@@ -8,8 +8,9 @@ from jwt.exceptions import ExpiredSignatureError
 import json
 
 app = Flask(__name__)
-client = MongoClient('mongodb://test:test@13.124.58.16',27017)
+client = MongoClient('mongodb://test:test@13.124.58.16', 27017)
 db = client.dbjungle
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -17,13 +18,15 @@ class CustomJSONEncoder(json.JSONEncoder):
             return str(o)
         return json.JSONEncoder.default(self, o)
 
+
 class CustomJSONProvider(JSONProvider):
     def dumps(self, obj, **kwargs):
         return json.dumps(obj, **kwargs, cls=CustomJSONEncoder)
 
     def loads(self, s, **kwargs):
         return json.loads(s, **kwargs)
-    
+
+
 app.json = CustomJSONProvider(app)
 
 
@@ -34,27 +37,35 @@ app.json = CustomJSONProvider(app)
 * Author : 홍선우
 * 
 '''
-#로그인 페이지
+# 로그인 페이지
+
+
 @app.route('/')
 def login():
     return render_template('login.html')
+
 
 '''
 * 회원가입
 * Author : 김진태
 *
 '''
-#회원가입 페이지
+# 회원가입 페이지
+
+
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
+
 
 '''
 * 메인페이지
 * Author : 김병철
 *
 '''
-#메인 페이지
+# 메인 페이지
+
+
 @app.route('/main')
 def main():
     return render_template('main.html', name="정글이", id="jungle02")
