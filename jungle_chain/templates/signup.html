@@ -29,7 +29,7 @@
     <!-- JavaScript -->
     <script>
       $(document).ready(function () {
-        // 파일 선택 버튼을 클릭하면 파일 입력란을 클릭
+        // 업로드 버튼을 클릭하면 이미지 업로드
         $("#fileButton").click(function () {
           $("#image").click();
         });
@@ -52,13 +52,43 @@
         });
       });
 
-      // 비밀번호 체크 기능
-      function validatePassword() {
+      // ID 중복 체크 확인 (등록 버튼에서 확인)
+      $("#userId").blur(function () {
+        console.log("afdsafdasf");
+        checkUserId(); // 함수를 호출
+      });
+
+      function checkUserId() {
+        var userId = document.getElementById("userId").value;
+        $.ajax({
+          type: "GET",
+          url: "/checkId",
+          data: { id_give: userId },
+          success: function (response) {
+            if (response == "failure") {
+              alert("아이디가 중복됩니다.");
+            }
+          },
+        });
+      }
+
+      // 데이터 유효성 검사
+      function checkData() {
         var pw = document.getElementById("password").value;
         var pw2 = document.getElementById("password2").value;
+        var name = document.getElementById("userName").value;
+        var mbti = document.getElementById("mbti").value;
+
+        if (name == "") {
+          alert("이름을 입력해 주세요.");
+        }
 
         if (pw != pw2) {
           alert("패스워드가 일치하지 않습니다.");
+        }
+
+        if (mbti == "") {
+          alert("MBTI를 선택해 주세요.");
         }
       }
     </script>
@@ -177,7 +207,7 @@
         </div>
       </div>
       <div class="buttons">
-        <button type="submit" class="button is-info">등록</button>
+        <button type="submit" class="button is-info" onclick="checkData()">등록</button>
         <button class="button is-info">취소</button>
       </div>
     </form>

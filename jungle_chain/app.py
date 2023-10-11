@@ -57,6 +57,25 @@ def login():
 def signup():
     return render_template('signup.html')
 
+# ID 중복 체크 확인
+
+
+@app.route('/checkId')
+def check_id():
+    id_receive = request.args.get('id_give')
+    if id_receive == 'jungle':
+        response = {'result': 'failure'}
+    else:
+        response = {'result': 'success'}
+
+    return jsonify(response)
+    '''
+    result = db.users.find_one({'id': id_receive})
+
+    if result is not None:
+        return 'failure'
+    '''
+
 
 '''
 * 메인페이지
