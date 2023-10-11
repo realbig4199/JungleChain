@@ -47,12 +47,14 @@ input {
 }
 
 .buttons {
-  text-align: right; /* 내부 텍스트를 오른쪽 정렬 */
+  display: flex;
+  justify-content: end; /* 내부 텍스트를 오른쪽 정렬 */
 }
 
 /* 선택적으로 버튼 사이의 간격을 조절할 수 있습니다. */
 .buttons button {
   margin-left: 10px; /* 버튼 사이에 10px 간격 설정 */
+  width: 10vw;
 }
 
 #fileButton {
