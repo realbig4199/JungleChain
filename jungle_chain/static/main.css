@@ -1,0 +1,31 @@
+body a{text-decoration: none;color: black;}
+.center {text-align: center;}
+.sorter-box {width: 820px;}
+.movie-list {width: 800px;margin: 20px auto 0 auto;}
+.movie-title {display: inline-block;font-weight: bold;font-size: 20px;}
+.movie-title:hover {text-decoration: underline;}
+.card {margin-bottom: 15px;}
+.card-infomation {display: inline-block;padding: 5%;font-size: 14px;}
+.card-img-left {width : 14%;float : left;margin-right: 3%;}
+.card-info-right {width: 80%;float : left;}
+.card-btn-box{width: 100%;}
+.movie-poster {width: 100%;height: auto;}
+.card-btn-box {
+    border-top: var(--bs-card-border-width) solid var(--bs-card-border-color);
+    display: inline-block;
+    height: 65px;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+.card-btn-left{
+    width: 50%;
+    height: 100%;
+    border-right: var(--bs-card-border-width) solid var(--bs-card-border-color);
+    float: left;
+    text-align: center;
+    padding: 10px 0;
+}
+.card-btn-left a{color: #3babe1;vertical-align:middle;}
+.card-btn-right{width: 50%;height: 100%;float: left;text-align: center;padding: 10px 0;}
+.card-btn-right a{color: red;vertical-align:middle;}
+.trash-btn-div a{color: #20d37a;}
