@@ -1,0 +1,61 @@
+* {
+  margin: 0px;
+  box-sizing: border-box;
+  font-size: 11px;
+}
+
+.wrapper {
+  margin: 5vw auto; /* 상대적인 마진 설정 (화면 너비의 5%로 설정) */
+  width: 40vw; /* 너비를 화면 너비의 40%로 설정 */
+  padding: 2vh; /* 패딩을 화면 높이의 2%로 설정 */
+  border: 1px solid black;
+}
+
+.title > h1 {
+  text-align: left;
+  font-size: 21px;
+}
+
+#previewImage {
+  display: none;
+}
+
+/* article 클래스 내의 요소들을 세로로 배치하고 우측 정렬합니다. */
+.article {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* 개별 요소 간 간격을 조절합니다. */
+.article > div {
+  margin-top: 10px; /* 원하는 간격 값으로 조절합니다. */
+}
+
+/* 모든 input 및 select 요소에 공통적으로 적용되는 스타일 */
+input {
+  width: 90%; /* 너비를 100%로 설정하여 부모 요소의 폭에 맞춥니다. */
+  padding: 10px; /* 원하는 패딩 값을 지정합니다. */
+  margin-bottom: 5px; /* 각 요소 간 간격을 조절합니다. */
+  border: 1px solid #ccc; /* 원하는 테두리 스타일 및 색상을 설정합니다. */
+  border-radius: 5px; /* 테두리를 둥글게 만듭니다. */
+}
+
+.full-width {
+  width: 33vw;
+  height: 3.5vh;
+}
+
+.buttons {
+  text-align: right; /* 내부 텍스트를 오른쪽 정렬 */
+}
+
+/* 선택적으로 버튼 사이의 간격을 조절할 수 있습니다. */
+.buttons button {
+  margin-left: 10px; /* 버튼 사이에 10px 간격 설정 */
+}
+
+#fileButton {
+  margin: 10px auto;
+  width: 6.75vw;
+}

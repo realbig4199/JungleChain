@@ -1,0 +1,7 @@
+document.addEventListener("DOMContentLoaded", function () { const image = document.querySelector("#image"); const
+imageContainer = document.querySelector("#image_container"); const fileButton = document.querySelector("#fileButton");
+image.addEventListener("change", (e) => { const reader = new FileReader(); reader.readAsDataURL(e.target.files[0]); //
+업로드된 이미지를 보여주는 코드 reader.onload = function (event) { const img = document.createElement("img");
+img.setAttribute("src", event.target.result); // 이미지를 교체하는 부분 imageContainer.innerHTML = ""; // 기존 이미지
+제거 imageContainer.appendChild(img); // 새 이미지 추가 }; }); fileButton.addEventListener("click", function () {
+image.click(); // 파일 업로드 버튼을 클릭하여 파일 선택 다이얼로그를 표시 }); });
