@@ -228,9 +228,24 @@
             
             /*----------------------------------------------------------------------*/
             function openPop(targetId){ 
+                // 화면의 너비와 높이를 가져옵니다
+                var screenWidth = window.screen.width;
+                var screenHeight = window.screen.height;
+
+                // 새로운 창의 너비와 높이를 계산합니다
+                var popupWidth = screenWidth * 0.5;
+                var popupHeight = screenHeight * 0.8;
+
+                // 팝업 창을 중앙에 위치시키기 위해 화면 가운데 좌표 계산
+                var left = (screenWidth - popupWidth) / 2;
+                var top = (screenHeight - popupHeight) / 2;
+
+                // 팝업 창을 엽니다
                 window.open(
-                    "/mod?id="+$(targetId).attr("id"), "_blank", "popup"
-                ); 
+                    "/mod?id=" + $(targetId).attr("id"),
+                    "_blank",
+                    "width=" + popupWidth + ",height=" + popupHeight + ",left=" + left + ",top=" + top
+                );
             }
         </script>
     </head>
