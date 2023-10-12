@@ -80,21 +80,21 @@ def user_login():
 # ID 중복 체크 확인
 
 
-@app.route('/checkId')
-def check_id():
-    id_receive = request.args.get('id_give')
-<<<<<<< HEAD
+# @app.route('/checkId')
+# def check_id():
+#     id_receive = request.args.get('id_give')
+# <<<<<<< HEAD
     
-=======
-    # 컬렉션 추후 users에서 user로 바꿔야 함.
->>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
-    user = db.user.find_one({'user_id': id_receive})
-    if user:
-        response = {'result': 'failure'}
-    else:
-        response = {'result': 'success'}
+# =======
+#     # 컬렉션 추후 users에서 user로 바꿔야 함.
+# >>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
+#     user = db.user.find_one({'user_id': id_receive})
+#     if user:
+#         response = {'result': 'failure'}
+#     else:
+#         response = {'result': 'success'}
 
-    return jsonify(response)
+#     return jsonify(response)
 
 
 @app.route("/join", methods=["POST"])
@@ -184,7 +184,8 @@ def find():
     try:
         # token디코딩합니다.
         payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
-        userinfo = db.user.find_one({'user_id': payload['user_id'], 'user_name': payload['user_name'], '_token': payload['token_receive']}, {'_id': 0})
+        myuser = db.user.find_one({'user_id': payload['user_id']})
+        userinfo = {'user_id':myuser['user_id'], 'user_name':myuser['user_name'], 'user_token':token_receive}
         breakpoint()
         print(userinfo)
         return render_template("main.html", user_info=userinfo)
