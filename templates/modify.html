@@ -29,6 +29,15 @@
     <!-- JavaScript -->
     <script>
       $(document).ready(function () {
+        userId = $("#user_id").val();
+        userImg = $("#user_img").val();
+        if(userImg !=""){
+          $("#user_imgPreview").attr("src", "../static/upload/"+userId+"."+userImg);
+        } else {
+          $("#user_imgPreview").attr("src", "../static/img/default_image.jpg");
+        }
+
+
         // 업로드 버튼을 클릭하면 이미지 업로드
         $("#fileButton").click(function () {
           $("#image").click();
@@ -147,8 +156,10 @@
       <!-- bulma로 묶어주기 -->
       <div class="media">
         <div class="media-left">
+          <input type="hidden" value="{{ user_data.img }}" id="user_img">
+          <input type="hidden" value="{{ user_data.user_id }}" id="user_id">
           <div id="image_container" class="image is-128x128">
-            <img src="{{ user_data.img }}" alt="기본 이미지" />
+            <img src="" alt="기본 이미지" id="user_imgPreview"/>
           </div>
           <button class="btn btn-primary" id="fileButton">업로드</button>
           <input type="file" id="image" name="img_give" accept="image/*" style="display: none" />
