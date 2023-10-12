@@ -28,25 +28,28 @@
             });
 
             function setGraph(friendData, resultData){
-                
+                var imgFlag = $("#user_imgExr").val() =="" ? true : false;
+                var imgUrl = imgFlag? "../static/img/default_image.jpg": "../static/upload/"+$("#user_info").val()+"."+$("#user_imgExr").val()
+
                 NETWORK_DATA = {
                     "nodes" : [
                         {
                             "id"    : $("#user_info").val(),
                             "value" : 10,
                             "group" : "user",
-                            "img"   : "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                            "img"   : imgUrl
                         }
                     ] , "links": []
                 }
 
                 for(key in friendData){
-                    
+                    var imgFlag = friendData[key] =="" ? true : false;
+                    var imgUrl = imgFlag? "../static/img/default_image.jpg": "../static/upload/"+key+"."+friendData[key]
                     dataSet = {
                         "id"    : key,
                         "value" : 3,
                         "group" : null,
-                        "img"   : friendData[key]
+                        "img"   : imgUrl
                     }
                     NETWORK_DATA["nodes"].push(dataSet);
                 }
@@ -164,6 +167,12 @@
                                 .data(nodes)
                                 .enter()
                                 .append("g")
+                                .on("dblclick",function(d){ 
+                                    nodeId = d.id
+                                    window.open(
+                                        "/detail?id="+nodeId, "_blank", "popup"
+                                    ); 
+                                 })
                                 .each(function(d){
                                     d3.select(this).append('clipPath')
                                     .attr('id','clipObj')  
@@ -229,6 +238,7 @@
         <div class="mx-auto sorter-box mt-4">
             <div class="" style="height: 85px;">
                 <input type="hidden" value="{{user_id}}" id="user_info"/>
+                <input type="hidden" value="{{img}}" id="user_imgExr"/>
                 <div class="" style="height: 50%;">
                     <a href="#" class="btn btn-primary" id="{{user_id}}" onclick="openPop(this)" style="float:left">
                         정보 수정

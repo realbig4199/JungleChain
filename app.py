@@ -192,7 +192,7 @@ def mod():
             "gender": data['gender'],
             "univ": data['univ'],
             "major": data['major'],
-            # "img": data['img']
+            "img": data['img']
         }
         mbti_list = list(db.tbl_cd.find(
             {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
@@ -222,35 +222,45 @@ def mod_data():
     university_recieve = request.form["university_give"]
     major_recieve = request.form["major_give"]
 
-    img_recieve = request.files.getlist("files[]")
+    img_recieve = None
+    
+    if "img_give" in request.files:
+        img_recieve = request.files['img_give']
 
-    if img_recieve:
-        first_file = img_recieve[0]  # 첫 번째 파일만 가져옴.
-        # 파일 이름을 보안에 적합한 이름으로 변환
-        # filename = secure_filename(first_file.filename)
-        filename = secure_filename(first_file.filename)
-        file_path = '../static/img/' + filename  # 저장할 경로와 파일 이름을 조합
-        first_file.save(file_path)  # 파일을 서버에 저장
-        img_recieve = filename
-        # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
-        img_recieve = filename  # 파일 이름을 img_recieve에 할당
-    result = db.user.update_many({'user_id': id_recieve}, {
-        '$set': {'user_pw': pw_recieve,
-                 'user_name': name_recieve,
-                 'mbti': mbti_recieve,
-                 'region': region_recieve,
-                 'smoking': smoking_recieve,
-                 'gender': gender_recieve,
-                 'univ': university_recieve,
-                 'major': major_recieve,
-                 'img': img_recieve
-                 }})
-    # 유효성 검사
-    if result.modified_count == 1:
+    if img_recieve: 
+        if allowed_file(img_recieve.filename):
+            result = db.user.update_many({'user_id': id_recieve}, {
+                '$set': {'user_pw': pw_recieve,
+                    'user_name': name_recieve,
+                    'mbti': mbti_recieve,
+                    'region': region_recieve,
+                    'smoking': smoking_recieve,
+                    'gender': gender_recieve,
+                    'univ': university_recieve,
+                    'major': major_recieve,
+                }
+            })
+
+            file = img_recieve
+            filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
+            filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepathtosave)
+            db.user.update_one({'user_id': id_recieve}, {'$set': {"img"  : img_recieve.filename.rsplit('.', 1)[1]}})
+            return jsonify({'result': 'success'})
+        else :
+            return jsonify({'result': 'failure', 'msg': '허용되지 않는 확장자입니다.'})
+    else :
+        result = db.user.update_many({'user_id': id_recieve}, {
+            '$set': {'user_pw': pw_recieve,
+                    'user_name': name_recieve,
+                    'mbti': mbti_recieve,
+                    'region': region_recieve,
+                    'smoking': smoking_recieve,
+                    'gender': gender_recieve,
+                    'univ': university_recieve,
+                    'major': major_recieve,
+                    }})
         return jsonify({'result': 'success'})
-    else:
-        return jsonify({'result': 'failure'})
-
 
 # 메인 페이지
 @app.route('/find')
@@ -263,7 +273,7 @@ def find():
         myuser = db.user.find_one({'user_id': payload['user_id']})
         userinfo = {'user_id': myuser['user_id'],
                     'user_name': myuser['user_name'], 'user_token': token_receive}
-        return render_template("main.html", user_id=userinfo['user_id'], user_name=userinfo['user_name'])
+        return render_template("main.html", user_id=userinfo['user_id'], user_name=userinfo['user_name'], img=myuser['img'])
 
     except jwt.ExpiredSignatureError:
         return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
@@ -305,7 +315,7 @@ def main():
     user_id = request.args.get('user_id')
     data = db.user.find_one({'user_id': user_id})
 
-    return render_template('main.html', user_name=data['user_name'], user_id=user_id)
+    return render_template('main.html', user_name=data['user_name'], user_id=user_id, img=data['img'])
 
 
 @app.route('/main/search', methods=['POST'])
@@ -336,7 +346,7 @@ def getNetworkGraph():
             if "img" in data_set:
                 img_id = data_set["img"]
             else:
-                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                img_id = ""
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
@@ -353,7 +363,7 @@ def getNetworkGraph():
             if "img" in data_set:
                 img_id = data_set["img"]
             else:
-                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                img_id = ""
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
@@ -370,7 +380,7 @@ def getNetworkGraph():
             if "img" in data_set:
                 img_id = data_set["img"]
             else:
-                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                img_id = ""
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
@@ -388,7 +398,7 @@ def getNetworkGraph():
             if "img" in data_set:
                 img_id = data_set["img"]
             else:
-                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                img_id = ""
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
@@ -407,7 +417,7 @@ def getNetworkGraph():
             if "img" in data_set:
                 img_id = data_set["img"]
             else:
-                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                img_id = ""
 
             if user_id not in result_data:
                 result_data[user_id] = 1
@@ -426,7 +436,7 @@ def getNetworkGraph():
             if "img" in data_set:
                 img_id = data_set["img"]
             else:
-                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                img_id = ""
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
@@ -435,17 +445,66 @@ def getNetworkGraph():
 
         del queryString['gender']
 
-    '''
-    #합산 시작
-    if
-    for data_set in mbti_data:
-        data_set.
-    '''
 
     response = {'result': 'success', "sort": "",
                 "resultData": result_data, "friendData": friend_data}
     return jsonify(response)
 
+@app.route('/detail', methods=['GET'])
+def detail():
+    user_id = request.args.get('id')
+    data = db.user.find_one({'user_id': user_id})
+    
+    if data:
+        # Flask 템플릿에 전달할 데이터 설정
+        mbti_nm = ""
+        region_nm = ""
+        smoking_nm = ""
+        gender_nm = ""
+        
+        mbti_list = list(db.tbl_cd.find(
+            {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+        region_list = list(db.tbl_cd.find(
+            {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
+
+        
+        for dataSet in mbti_list:
+            if data['mbti'] == dataSet['code']:
+                print(data['mbti'])
+                print( dataSet['code'])
+                mbti_nm = dataSet['cd_nm']
+
+
+        for dataSet in region_list:
+            if data['region'] == dataSet['code']:
+                region_nm = dataSet['cd_nm']
+        
+        if data['smoking'] == 'Y':
+            smoking_nm = '흡연'
+        else :
+            smoking_nm = '비흡연'
+
+        if data['gender'] == 'M':
+            gender_nm = '남성'
+        else :
+            gender_nm = '여성'
+
+
+
+        user_data = {
+            'user_id': data['user_id'],
+            'user_pw': data['user_pw'],
+            'user_name': data['user_name'],
+            "mbti": mbti_nm,
+            "region": region_nm,
+            "smoking": smoking_nm,
+            "gender": gender_nm,
+            "univ": data['univ'],
+            "major": data['major'],
+            "img": data['img']
+        }
+
+        return render_template('detail.html', user_data=user_data)
 
 @app.route('/logout')
 def logout():
