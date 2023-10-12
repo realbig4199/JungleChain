@@ -462,17 +462,13 @@ def detail():
         smoking_nm = ""
         gender_nm = ""
         
-        mbti_list = list(db.tbl_cd.find(
-            {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+        mbti_list = list(db.tbl_cd.find({'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
         region_list = list(db.tbl_cd.find(
             {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
-
         
-        for dataSet in mbti_list:
-            if data['mbti'] == dataSet['code']:
-                print(data['mbti'])
-                print( dataSet['code'])
-                mbti_nm = dataSet['cd_nm']
+        for mbtiSet in mbti_list:
+            if data['mbti'] == mbtiSet['code']:
+                mbti_nm = mbtiSet['cd_nm']
 
 
         for dataSet in region_list:
@@ -488,8 +484,6 @@ def detail():
             gender_nm = '남성'
         else :
             gender_nm = '여성'
-
-
 
         user_data = {
             'user_id': data['user_id'],
