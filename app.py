@@ -146,11 +146,10 @@ def join():
 
 
 # 수정 페이지
-@app.route('/mod')
+@app.route('/mod', methods=['GET'])
 def mod():
-    user_id = request.args.get('user_id')
-    data = db.user.find_one({'id': user_id})
-
+    user_id = request.args.get('id')
+    data = db.user.find_one({'user_id': user_id})
     if data:
         # Flask 템플릿에 전달할 데이터 설정
         user_data = {
@@ -163,7 +162,7 @@ def mod():
             "gender": data['gender'],
             "univ": data['univ'],
             "major": data['major'],
-            "img": data['img']
+            # "img": data['img']
         }
         return render_template('modify.html', user_data=user_data)
     else:
