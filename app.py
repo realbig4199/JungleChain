@@ -8,7 +8,7 @@ from jwt.exceptions import ExpiredSignatureError
 from datetime import datetime, timedelta
 import json
 import os
-import time  # https://kimxavi.tistory.com/entry/python-JWT-example
+import time
 import jwt
 secret_key = 'junglechain'
 
@@ -34,6 +34,9 @@ class CustomJSONProvider(JSONProvider):
 
 app.json = CustomJSONProvider(app)
 
+UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
 
 # URL 별로 함수명이 같거나,
 # route('/') 등의 주소가 같으면 안됩니다.
@@ -55,11 +58,13 @@ def home():
 @app.route('/login', methods=['POST'])
 def user_login():
     # 로그인 정보 유효성 확인 코드
-    id_recieve = request.form['id_give']
-    pw_recieve = request.form['pw_give']
+    jsonData = json.loads(request.data)
+
+    id_recieve = jsonData.get('id_give')
+    pw_recieve = jsonData.get('pw_give')
 
     # id, 암호화된pw을 가지고 해당 유저를 찾습니다.
-    result = db.users.find_one({'user_id': id_recieve, 'user_pw': pw_recieve})
+    result = db.user.find_one({'user_id': id_recieve, 'user_pw': pw_recieve})
 
     # 로그인 정보 유효할 시 token 생성 후 client로 전달
     if result is not None:
@@ -78,50 +83,53 @@ def user_login():
 # ID 중복 체크 확인
 
 
-@app.route('/checkId')
-def check_id():
-    id_receive = request.args.get('id_give')
-    # 컬렉션 추후 users에서 user로 바꿔야 함.
-    user = db.user.find_one({'user_id': id_receive})
-    if user:
-        response = {'result': 'failure'}
-    else:
-        response = {'result': 'success'}
+# @app.route('/checkId')
+# def check_id():
+#     id_receive = request.args.get('id_give')
+# <<<<<<< HEAD
 
-    return jsonify(response)
+# =======
+#     # 컬렉션 추후 users에서 user로 바꿔야 함.
+# >>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
+#     user = db.user.find_one({'user_id': id_receive})
+#     if user:
+#         response = {'result': 'failure'}
+#     else:
+#         response = {'result': 'success'}
+
+#     return jsonify(response)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif'])
 
 
 @app.route("/join", methods=["POST"])
 def join():
     # 사용자 정보 받아오기
+
     id_recieve = request.form["id_give"]
     pw_recieve = request.form["pw_give"]
     name_recieve = request.form["name_give"]
 
     mbti_recieve = request.form["mbti_give"]
-    region_recieve = request.form["region_give"]
-    smoking_recieve = request.form["smoking_give"]
-    gender_recieve = request.form["gender_give"]
+
+    region_recieve = ""
+    if "region_give" in request.form:
+        region_recieve = request.form["region_give"]
+    smoking_recieve = ""
+    if "smoking_give" in request.form:
+        smoking_recieve = request.form["smoking_give"]
+    gender_recieve = ""
+    if "gender_give" in request.form:
+        gender_recieve = request.form["gender_give"]
+
     university_recieve = request.form["university_give"]
     major_recieve = request.form["major_give"]
 
-    img_recieve = request.files.getlist("files[]")
-
-    if img_recieve:
-        first_file = img_recieve[0]  # 첫 번째 파일만 가져옴.
-        # 파일 이름을 보안에 적합한 이름으로 변환
-        # filename = secure_filename(first_file.filename)
-        filename = secure_filename(first_file.filename)
-        file_path = '../static/img/' + filename  # 저장할 경로와 파일 이름을 조합
-        first_file.save(file_path)  # 파일을 서버에 저장
-        img_recieve = filename
-        # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
-        img_recieve = filename  # 파일 이름을 img_recieve에 할당
-
-    # for file in img_recieve:
-    #     if file:
-    #         filename = file.filename
-    #         print(filename)
+    img_recieve = None
+    if "img_give" in request.files:
+        img_recieve = request.files['img_give']
 
     result = db.users.find_one({'id': id_recieve})
 
@@ -138,9 +146,17 @@ def join():
             "gender": gender_recieve,
             "univ": university_recieve,
             "major": major_recieve,
-            "img": img_recieve
+            "img": img_recieve.filename.rsplit('.', 1)[1]
         })
-        return jsonify({'result': 'success'})
+
+        if img_recieve and allowed_file(img_recieve.filename):
+            file = img_recieve
+            filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
+            filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepathtosave)
+            return jsonify({'result': 'success'})
+        else:
+            return jsonify({'result': 'fail', 'msg': '허용되지 않는 확장자입니다.'})
 
 
 # 수정 페이지
@@ -212,17 +228,19 @@ def mod_data():
 
 
 # 메인 페이지
-app.route('/find')
-
-
+@app.route('/find')
 def find():
     token_receive = request.cookies.get('mytoken')
 
     try:
         # token디코딩합니다.
         payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
-        userinfo = db.users.find_one({'id': payload['id']}, {'_id': 0})
-        return render_template("Main.html", user_info=userinfo)
+        myuser = db.user.find_one({'user_id': payload['user_id']})
+        userinfo = {'user_id': myuser['user_id'],
+                    'user_name': myuser['user_name'], 'user_token': token_receive}
+        breakpoint()
+        print(userinfo)
+        return render_template("main.html", user_info=userinfo)
 
     except jwt.ExpiredSignatureError:
         return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
@@ -240,7 +258,17 @@ def find():
 
 @app.route('/signup')
 def signup():
-    return render_template('signup.html')
+
+    mbti_list = list(db.tbl_cd.find(
+        {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+    region_list = list(db.tbl_cd.find(
+        {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
+    smoking_list = list(db.tbl_cd.find(
+        {'knd': 'smoking'}, {"code": "1", "cd_nm": "1"}))
+    gender_list = list(db.tbl_cd.find(
+        {'knd': 'gender'}, {"code": "1", "cd_nm": "1"}))
+    return render_template('signup.html', mbti_list=mbti_list, region_list=region_list, smoking_list=smoking_list, gender_list=gender_list
+                           )
 
 
 '''
