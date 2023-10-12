@@ -43,11 +43,15 @@ app.json = CustomJSONProvider(app)
 * 
 '''
 # 초기 페이지
+
+
 @app.route('/')
 def home():
-    return render_template('login.html', title = '정글 고리')
+    return render_template('login.html', title='정글 고리')
 
 # 로그인
+
+
 @app.route('/login', methods=['POST'])
 def user_login():
     # 로그인 정보 유효성 확인 코드
