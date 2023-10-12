@@ -300,14 +300,12 @@ def signup():
 *
 '''
 # 메인 페이지
-
-
 @app.route('/main')
 def main():
+    user_id = request.args.get('user_id')
+    data = db.user.find_one({'user_id': user_id})
 
-    # [FIXME] JWT 인증 기능 구현 필요
-
-    return render_template('main.html', name="정글이", id="jungle")
+    return render_template('main.html', user_name=data['user_name'], user_id=user_id)
 
 
 @app.route('/main/search', methods=['POST'])
