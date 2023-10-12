@@ -147,7 +147,8 @@ def join():
                     "gender": gender_recieve,
                     "univ": university_recieve,
                     "major": major_recieve,
-                    "img": ""
+                    "img": "",
+                    "like": 0
                 })
 
                 file = img_recieve
@@ -171,7 +172,8 @@ def join():
                 "gender": gender_recieve,
                 "univ": university_recieve,
                 "major": major_recieve,
-                "img": ""
+                "img": "",
+                "like": 0
             })
             return jsonify({'result': 'success'})
 
@@ -498,10 +500,23 @@ def detail():
             "gender": gender_nm,
             "univ": data['univ'],
             "major": data['major'],
-            "img": data['img']
+            "img": data['img'],
+            "like": data['like']
         }
 
         return render_template('detail.html', user_data=user_data)
+
+@app.route('/detail/like')
+def like():
+    user_id = request.args.get('id')
+    data = db.user.find_one({'user_id': user_id})
+    like_cnt = int(data['like']) + 1
+
+    db.user.update_one({'user_id': user_id}, {'$set': {"like": like_cnt}})
+
+    response = {'result': 'success', 'like_cnt': like_cnt}
+
+    return jsonify(response)
 
 @app.route('/logout')
 def logout():
