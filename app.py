@@ -105,6 +105,7 @@ def join():
     university_recieve = request.form["university_give"]
     major_recieve = request.form["major_give"]
 
+    breakpoint()
     img_recieve = request.files.getlist("files[]")
 
     if img_recieve:
