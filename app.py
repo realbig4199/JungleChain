@@ -148,11 +148,36 @@ def signup():
 *
 '''
 # 메인 페이지
-
-
 @app.route('/main')
 def main():
+
+    #[FIXME] JWT 인증 기능 구현 필요
+
     return render_template('main.html', name="정글이", id="jungle02")
+
+
+@app.route('/main/search', methods=['POST'])
+def getNetworkGraph():
+    jsonData = json.loads(request.data)
+
+    mbti_flag = jsonData.get('mbtiBtn')
+    region_flag = jsonData.get('locBtn')
+    univ_flag = jsonData.get('schoolBtn')
+    major_flag = jsonData.get('majBtn')
+    gender_flag = jsonData.get('genBtn')
+    smoking_flag = jsonData.get('smkBtn')
+
+    
+
+    response = {'result': 'success', "sort" : ""}
+    return jsonify(response)
+
+@app.route('/logout')
+def logout():
+
+    #[FIXME] 로그아웃 JWT 제거 구현 필요
+
+    return render_template('login.html')
 
 
 if __name__ == '__main__':

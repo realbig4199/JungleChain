@@ -14,10 +14,47 @@
         <link href="../static/main.css" rel="stylesheet" />
         <title>정글고리</title>
         <script>
+            const BTN_LIST = {
+                "mbtiBtn"   : false,
+                "locBtn"    : false,
+                "schoolBtn" : false,
+                "majBtn"    : false,
+                "genBtn"    : false,
+                "smkBtn"    : false
+            }
+
             $(document).ready(function () {
                 $('#mbtiBtn').click();
-                networkGraph.createGraph();
             });
+
+            function setGraph(json){
+                NETWORK_DATA = "";
+
+                for(var i=0; i< json.data.length; i++){
+                    item = json.data[i];
+                    
+                    dataSet = {
+                        "id"    : item.id,
+                        "value" : item.value,
+                        "group" : item.group,
+                        "img"   : item.img
+                    }
+                    ETWORK_DATA["nodes"].push(dataSet);
+                }
+
+                for(var i=0; i< json.link.length; i++){
+                    line = json.link[i];
+                    linkSet = {
+                        "source"    : line.source,
+                        "target"    : line.target,
+                        "value"     : line.value
+                    }
+                    ETWORK_DATA["links"].push(linkSet);
+                }
+
+                networkGraph.createGraph();
+            }
+
             var NETWORK_DATA = {
                 "nodes": [
                     {
@@ -120,32 +157,42 @@
                     selectId.addClass('active')
                 }
 
-                selectArr = [];
                 $('.accoBtn').each(function(idx, item){
                     if($(this).hasClass('active')){
                         target = $(this).attr("id");
-                        selectArr.push(target);
+                        if(BTN_LIST[target] == false){
+                            BTN_LIST[target] = true
+                        } 
+                    } else {
+                        target = $(this).attr("id");
+                        BTN_LIST[target] == false
                     }
                 });
-                return ;
-                getAcco(selectArr);
+                
+                getGraph(BTN_LIST);
             }
 
-            function getAcco(arrData) {
+            function getGraph(jsonData) {
+                console.log(jsonData);
                 $.ajax({
                     type: "POST",
-                    url: "/api/getAcco",
-                    traditional : true,
-                    data: {'arr': arrData},
+                    url: "/main/search",
+                    contentType : "application/json",
+                    data: JSON.stringify(jsonData),
                     success: function (response) {
-                        if (response['result'] == 'success') {
+                        console.log(response);
+                        return ;
 
+                        if (response['result'] == 'success') {
+                            setGraph(json);
                         } else {
                             
                         }
                     }
                 });
             }
+            
+
             /******** network graph ********/
 
             var networkGraph = {
@@ -176,8 +223,6 @@
                             .force("charge", d3.forceManyBody().strength(-100))
                             .force("center", d3.forceCenter(width / 2, height / 2))
                             .force("collide",d3.forceCollide().radius( function(d){ return d.value*8}) );
-
-                    //simulation.stop(); // stop 필요한가?
 
 
                     var svg = d3.select("#NETWORK_GRAPH")
@@ -225,15 +270,8 @@
                             .attr("x2", function(d){ return d.target.x; })
                             .attr("y2", function(d){ return d.target.y; });
 
-                        /*node
-                            .attr("cx", function(d){ return d.x; })
-                            .attr("cy", function(d){ return d.y; });*/
-
-                        //circle 노드에서 g 노드로 변경
                         node.attr("transform", function(d) { return "translate("+d.x+","+ d.y+")"; });
                     });
-
-                    //invalidation.then(() => simulation.stop());
 
                     return svg.node();
                 },
@@ -262,8 +300,8 @@
                 }
             }
             
-
             /*----------------------------------------------------------------------*/
+            
         </script>
     </head>
     <body>
@@ -273,7 +311,7 @@
                     <a href="#" class="btn btn-primary" id="" onclick="" style="float:left">
                         정보 수정
                     </a>
-                    <a href="#" class="btn btn-primary" id="" onclick="" style="float:right">
+                    <a href="/logout" class="btn btn-primary" id="btn_logout" onclick="" style="float:right">
                         로그아웃
                     </a>
                 </div>
