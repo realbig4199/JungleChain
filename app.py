@@ -82,7 +82,7 @@ def user_login():
 def check_id():
     id_receive = request.args.get('id_give')
     # 컬렉션 추후 users에서 user로 바꿔야 함.
-    user = db.users.find_one({'user_id': id_receive})
+    user = db.user.find_one({'user_id': id_receive})
     if user:
         response = {'result': 'failure'}
     else:
@@ -145,10 +145,10 @@ def join():
 
 
 # 수정 페이지
-@app.route('/mod', methods=['POST'])
+@app.route('/mod')
 def mod():
-    user_id = request.form['user_id']
-    data = db.users.find_one({'id': user_id})
+    user_id = request.args.get('user_id')
+    data = db.user.find_one({'id': user_id})
 
     if data:
         # Flask 템플릿에 전달할 데이터 설정
@@ -163,7 +163,6 @@ def mod():
             "univ": data['univ'],
             "major": data['major'],
             "img": data['img']
-
         }
         return render_template('modify.html', user_data=user_data)
     else:
