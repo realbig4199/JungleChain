@@ -107,8 +107,8 @@ def allowed_file(filename):
 @app.route("/join", methods=["POST"])
 def join():
     # 사용자 정보 받아오기
-    id_recieve   = request.form["id_give"]
-    pw_recieve   = request.form["pw_give"]
+    id_recieve = request.form["id_give"]
+    pw_recieve = request.form["pw_give"]
     name_recieve = request.form["name_give"]
 
     mbti_recieve = request.form["mbti_give"]
@@ -131,12 +131,11 @@ def join():
         img_recieve = request.files['img_give']
 
     result = db.user.find_one({'id': id_recieve})
-    
 
     if result is not None:
         return jsonify({'result': 'fail', 'msg': 'ID 중복확인을 해주세요'})
     else:
-        if img_recieve: 
+        if img_recieve:
             if allowed_file(img_recieve.filename):
                 db.user.insert_one({
                     'user_id': id_recieve,
@@ -148,18 +147,20 @@ def join():
                     "gender": gender_recieve,
                     "univ": university_recieve,
                     "major": major_recieve,
-                    "img"  : ""
+                    "img": ""
                 })
 
                 file = img_recieve
-                filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
+                filename = id_recieve+'.' + \
+                    img_recieve.filename.rsplit('.', 1)[1]
                 filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(filepathtosave)
-                db.user.update_one({'user_id': id_recieve}, {'$set': {"img"  : img_recieve.filename.rsplit('.', 1)[1]}})
+                db.user.update_one({'user_id': id_recieve}, {
+                                   '$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
                 return jsonify({'result': 'success'})
-            else :
+            else:
                 return jsonify({'result': 'fail', 'msg': '허용되지 않는 확장자입니다.'})
-        else :
+        else:
             db.user.insert_one({
                 'user_id': id_recieve,
                 'user_pw': pw_recieve,
@@ -170,7 +171,7 @@ def join():
                 "gender": gender_recieve,
                 "univ": university_recieve,
                 "major": major_recieve,
-                "img"  : ""
+                "img": ""
             })
             return jsonify({'result': 'success'})
 
@@ -300,6 +301,8 @@ def signup():
 *
 '''
 # 메인 페이지
+
+
 @app.route('/main')
 def main():
     user_id = request.args.get('user_id')
