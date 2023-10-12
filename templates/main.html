@@ -98,6 +98,9 @@
             }
 
             function getGraph(jsonData) {
+                var user_id = $("#user_info").val();
+                jsonData["user_id"] = user_id;
+                
                 $.ajax({
                     type: "POST",
                     url: "/main/search",

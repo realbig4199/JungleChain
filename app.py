@@ -156,8 +156,7 @@ def join():
                     img_recieve.filename.rsplit('.', 1)[1]
                 filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(filepathtosave)
-                db.user.update_one({'user_id': id_recieve}, {
-                                   '$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
+                db.user.update_one({'user_id': id_recieve}, {'$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
                 return jsonify({'result': 'success'})
             else:
                 return jsonify({'result': 'fail', 'msg': '허용되지 않는 확장자입니다.'})
@@ -227,6 +226,8 @@ def mod_data():
 
     img_recieve = None
     
+    data_user = db.user.find_one({'user_id': id_recieve})
+
     if "img_give" in request.files:
         img_recieve = request.files['img_give']
 
@@ -243,6 +244,11 @@ def mod_data():
                     'major': major_recieve,
                 }
             })
+            
+            if 'img' in data_user:
+                oldFile = '../static/upload/'+data_user['user_id']+'.'+data_user['img']
+                if os.path.isfile(oldFile):
+                    os.remove(oldFile)
 
             file = img_recieve
             filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
@@ -327,7 +333,9 @@ def main():
 def getNetworkGraph():
     jsonData = json.loads(request.data)
 
-    my_data = db.user.find_one({'user_id': 'jungle'})
+    user_id = jsonData.get('user_id')
+
+    my_data = db.user.find_one({'user_id': user_id})
 
     mbti_flag = jsonData.get('mbtiBtn')
     region_flag = jsonData.get('locBtn')
@@ -335,12 +343,13 @@ def getNetworkGraph():
     major_flag = jsonData.get('majBtn')
     gender_flag = jsonData.get('genBtn')
     smoking_flag = jsonData.get('smkBtn')
+    
 
     result_data = {}
     friend_data = {}
 
     queryString = {
-        'user_id': {'$ne': 'jungle'}
+        'user_id': {'$ne': user_id}
     }
     if mbti_flag:
         queryString['mbti'] = my_data["mbti"]

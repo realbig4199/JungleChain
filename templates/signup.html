@@ -123,7 +123,7 @@
           
           var form = $("#signupForm")[0];
           var formData = new FormData(form);
-          
+
           // 서버로 Ajax POST 요청 보내기
           $.ajax({
             type: "POST",
@@ -214,7 +214,7 @@
         <div>
           <i class="fa-solid fa-smoking fa-2x"></i>
           <select class="full-width" name="smoking_give" id="smoke">
-            <option value="" disabled selected>흡연</option>
+            <option value="" disabled selected>흡연여부</option>
             {% for obj in smoking_list %}
               <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
             {% endfor %}
