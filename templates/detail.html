@@ -17,6 +17,23 @@
                 var imgUrl = imgFlag? "../static/img/default_image.jpg": "../static/upload/"+$("#user_id").val()+"."+$("#user_img").val()
                 $("#detail_image").attr('src', imgUrl);
             });
+
+            function like_btn(){
+                $.ajax({
+                    type: "GET",
+                    url: "/detail/like?id="+$("#user_id").val(),
+                    contentType : "application/json",
+                    data: {},
+                    success: function (response) {
+                        console.log(response)
+                        if (response['result'] == 'success') {
+                            $("#num_like").text(response['like_cnt']+" 좋아요");
+                        } else {
+                            alert(response['msg'])
+                        }
+                    }
+                });
+            };
         </script>
     </head>
     <body>
@@ -31,7 +48,7 @@
                                 <img src="" id="detail_image" style="width: 100%; height: 100%;">
                             </div>
                             <div class="likeSection"style="width: 100%; height: 20%;text-align: center; padding-top: 10%;">
-                                <a herf="" class="btn btn-primary mx-auto" value="" style="width: 50%;">좋아요</a>
+                                <a herf="javascript:void(0);" class="btn btn-primary mx-auto" value="" style="width: 50%;" onclick="like_btn()"><span id="num_like">{{user_data.like}} 좋아요<span> </a>
                             </div>
                         </div>
                         <div class="div-left" style="width:65%; float: left; padding-left:10%; padding-right:5%;height: 100%;">
