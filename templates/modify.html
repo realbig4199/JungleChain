@@ -181,22 +181,9 @@
           <i class="fa-solid fa-thumbtack fa-2x"></i>
           <select class="full-width" name="mbti_give" id="mbti">
             <option value="" disabled>MBTI</option>
-            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
-            <option value="intp" {% if user_data.mbti == 'intp' %}selected{% endif %}>INTP</option>
-            <option value="entj" {% if user_data.mbti == 'entj' %}selected{% endif %}>ENTJ</option>
-            <option value="entp" {% if user_data.mbti == 'entp' %}selected{% endif %}>ENTP</option>
-            <option value="infj" {% if user_data.mbti == 'infj' %}selected{% endif %}>INFJ</option>
-            <option value="infp" {% if user_data.mbti == 'infp' %}selected{% endif %}>INFP</option>
-            <option value="enfj" {% if user_data.mbti == 'enfj' %}selected{% endif %}>ENFJ</option>
-            <option value="enfp" {% if user_data.mbti == 'enfp' %}selected{% endif %}>ENFP</option>
-            <option value="istj" {% if user_data.mbti == 'istj' %}selected{% endif %}>ISTJ</option>
-            <option value="isfj" {% if user_data.mbti == 'isfj' %}selected{% endif %}>ISFJ</option>
-            <option value="estj" {% if user_data.mbti == 'estj' %}selected{% endif %}>ESTJ</option>
-            <option value="esfj" {% if user_data.mbti == 'esfj' %}selected{% endif %}>ESFJ</option>
-            <option value="istp" {% if user_data.mbti == 'istp' %}selected{% endif %}>ISTP</option>
-            <option value="isfp" {% if user_data.mbti == 'isfp' %}selected{% endif %}>ISFP</option>
-            <option value="estp" {% if user_data.mbti == 'estp' %}selected{% endif %}>ESTP</option>
-            <option value="esfp" {% if user_data.mbti == 'esfp' %}selected{% endif %}>ESFP</option>
+            {% for obj in mbti_list %}
+            <option value="{{ obj['code'] }}" {% if user_data.mbti == obj['code'] %}selected{% endif %}>{{ obj['cd_nm'] }}</option>
+            {% endfor %}
           </select>
         </div>
         <!-- 거주지 -->
@@ -204,24 +191,9 @@
           <i class="fa-solid fa-house-user fa-2x"></i>
           <select class="full-width" name="region_give" id="region">
               <option value="" disabled>거주지</option>
-              <option value="02" {% if user_data.region == '02' %}selected{% endif %}>서울</option>
-              <option value="031_0" {% if user_data.region == '031_0' %}selected{% endif %}>경기 북부</option>
-              <option value="031_1" {% if user_data.region == '031_1' %}selected{% endif %}>경기 남부</option>
-              <option value="051" {% if user_data.region == '051' %}selected{% endif %}>부산</option>
-              <option value="053" {% if user_data.region == '053' %}selected{% endif %}>대구</option>
-              <option value="032" {% if user_data.region == '032' %}selected{% endif %}>인천</option>
-              <option value="062" {% if user_data.region == '062' %}selected{% endif %}>광주</option>
-              <option value="042" {% if user_data.region == '042' %}selected{% endif %}>대전</option>
-              <option value="052" {% if user_data.region == '052' %}selected{% endif %}>울산</option>
-              <option value="044" {% if user_data.region == '044' %}selected{% endif %}>세종</option>
-              <option value="031" {% if user_data.region == '031' %}selected{% endif %}>강원</option>
-              <option value="043" {% if user_data.region == '043' %}selected{% endif %}>충북</option>
-              <option value="041" {% if user_data.region == '041' %}selected{% endif %}>충남</option>
-              <option value="063" {% if user_data.region == '063' %}selected{% endif %}>전북</option>
-              <option value="061" {% if user_data.region == '061' %}selected{% endif %}>전남</option>
-              <option value="054" {% if user_data.region == '054' %}selected{% endif %}>경북</option>
-              <option value="055" {% if user_data.region == '055' %}selected{% endif %}>경남</option>
-              <option value="064" {% if user_data.region == '064' %}selected{% endif %}>제주</option>
+              {% for obj in region_list %}
+              <option value="{{ obj['code'] }}" {% if user_data.region == obj['code'] %}selected{% endif %}>{{ obj['cd_nm'] }}</option>
+              {% endfor %}
           </select>
       </div>
         <!-- 흡연 여부 -->
@@ -229,8 +201,9 @@
           <i class="fa-solid fa-smoking fa-2x"></i>
           <select class="full-width" name="smoking_give" id="smoke">
               <option value="" disabled>흡연</option>
-              <option value="yes" {% if user_data.smoking == 'yes' %}selected{% endif %}>예</option>
-              <option value="no" {% if user_data.smoking == 'no' %}selected{% endif %}>아니오</option>
+              {% for obj in smoking_list %}
+              <option value="{{ obj['code'] }}" {% if user_data.smoking == obj['code'] %}selected{% endif %}>{{ obj['cd_nm'] }}</option>
+              {% endfor %}
           </select>
       </div>
         <!-- 성별 -->
@@ -238,8 +211,9 @@
           <i class="fa-solid fa-venus-double fa-2x"></i>
           <select class="full-width" name="gender_give" id="gender">
               <option value="" disabled>성별</option>
-              <option value="man" {% if user_data.gender == 'man' %}selected{% endif %}>남자</option>
-              <option value="woman" {% if user_data.gender == 'woman' %}selected{% endif %}>여자</option>
+              {% for obj in gender_list %}
+              <option value="{{ obj['code'] }}" {% if user_data.gender == obj['code'] %}selected{% endif %}>{{ obj['cd_nm'] }}</option>
+              {% endfor %}
           </select>
       </div>
         <!-- 학교 -->
