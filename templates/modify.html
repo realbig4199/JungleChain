@@ -130,7 +130,8 @@
               if (response.result === "success") {
                 // 수정이 성공한 경우 실행할 코드 (예: 리다이렉트)
                 alert("정보 수정에 성공했습니다.");
-                window.location.href = "/"; // 메인 페이지로 이동
+                window.close(); // 팝업 창 닫기
+                window.opener.location.href = "/main"; // 부모 창 리디렉션
               } else {
                 alert("정보 수정에 실패했습니다.");
               }
