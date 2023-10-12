@@ -172,8 +172,13 @@
                                 .append("g")
                                 .on("dblclick",function(d){ 
                                     nodeId = d.id
+                                    var popupWidth = 900; // 팝업 창의 너비
+                                    var popupHeight = 450; // 팝업 창의 높이
+                                    var left = (window.screen.width - popupWidth) / 2; // 화면 가로 중앙
+                                    var top = (window.screen.height - popupHeight) / 2; // 화면 세로 중앙
+
                                     window.open(
-                                        "/detail?id="+nodeId, "_blank", "popup"
+                                        "/detail?id="+nodeId, "_blank",  "width=" + popupWidth + ", height=" + popupHeight + ", left=" + left + ", top=" + top
                                     ); 
                                  })
                                 .each(function(d){
@@ -231,19 +236,11 @@
             
             /*----------------------------------------------------------------------*/
             function openPop(targetId){ 
-                // 화면의 너비와 높이를 가져옵니다
-                var screenWidth = window.screen.width;
-                var screenHeight = window.screen.height;
-
-                // 새로운 창의 너비와 높이를 계산합니다
-                var popupWidth = screenWidth * 0.5;
-                var popupHeight = screenHeight * 0.8;
-
-                // 팝업 창을 중앙에 위치시키기 위해 화면 가운데 좌표 계산
-                var left = (screenWidth - popupWidth) / 2;
-                var top = (screenHeight - popupHeight) / 2;
-
-                // 팝업 창을 엽니다
+                 // 팝업 창을 고정된 크기와 위치로 엽니다
+                var popupWidth = 700; // 팝업 창의 너비
+                var popupHeight = 700; // 팝업 창의 높이
+                var left = (window.screen.width - popupWidth) / 2; // 화면 가로 중앙
+                var top = (window.screen.height - popupHeight) / 2; // 화면 세로 중앙
                 window.open(
                     "/mod?id=" + $(targetId).attr("id"),
                     "_blank",
