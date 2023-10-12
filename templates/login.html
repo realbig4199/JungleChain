@@ -16,6 +16,33 @@
         }
 
     </style>
+    
+<script>
+    function login() {
+      $.ajax({
+          type: "POST",
+          url: "/login",
+          data: {
+              id_give: $('#input_ID').val(),
+              pw_give: $('#input_PW').val(),
+          },
+          success: function (response) {
+              console.log(response)
+              if (response['result'] == 'success') {
+                  $.cookie('mytoken', response['token']);
+                  alert('로그인 되었습니다!')
+                   window.location.href = '/find'
+              } else {
+                  alert(response['msg'])
+              }
+          }
+      })
+  }
+  function sign(){
+    window.location.href = '/sign'
+  }
+    
+</script>
 
 </head>
 <body>

@@ -1,26 +1,47 @@
-
-# @app.route('/')
-# def hello():
-#     return flask.render_template('login.html') 
-
-
-# import
-from flask import Flask, render_template
+from bson.objectid import ObjectId
+from pymongo import MongoClient
+from flask import Flask, render_template, jsonify, request
+from flask.json.provider import JSONProvider
 from flask_jwt_extended import *
 from flask_jwt_extended.config import config
 from jwt.exceptions import ExpiredSignatureError
+from datetime import datetime,timedelta
+import json
+import time # https://kimxavi.tistory.com/entry/python-JWT-example
+import jwt
+secret_key = 'junglechain'
 
-# flask객체 생성
 app = Flask(__name__)
+client = MongoClient('mongodb://test:test@13.124.58.16',27017)
+db = client.dbjungle
 
-# JWT 매니저 활성화
-jwt = JWTManager(app)
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
 
-# secret key 세팅
-app.config.update(
-    DEBUG=True,
-    JWT_SECRET_KEY="JUNGLECHAIN",
-)
+class CustomJSONProvider(JSONProvider):
+    def dumps(self, obj, **kwargs):
+        return json.dumps(obj, **kwargs, cls=CustomJSONEncoder)
+
+    def loads(self, s, **kwargs):
+        return json.loads(s, **kwargs)
+    
+app.json = CustomJSONProvider(app)
+
+
+# URL 별로 함수명이 같거나,
+# route('/') 등의 주소가 같으면 안됩니다.
+'''
+* 로그인
+* Author : 홍선우
+* 
+'''
+# 초기 페이지
+@app.route('/')
+def home():
+    return render_template('login.html')
 
 # 로그인
 @app.route('/login', methods=['POST'])
@@ -36,38 +57,47 @@ def user_login() :
          # JWT 토큰 생성
         payload = {
             'id': id_recieve,
-            'exp': datetime.utcnow() + timedelta(hours=2)
+            'exp': datetime.utcnow() + timedelta(hours=60) # 24시간 로그인 유지
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        token = jwt.encode(payload, secret_key, algorithm='HS256')
         return jsonify({'result': 'success', 'token': token})
     else:
         return jsonify({'result': 'fail', 'msg': '아이디 또는 비밀번호가 틀렸습니다.'})
+
+# 메인 페이지
+app.route('/find')
+def find():
+    token_receive = request.cookies.get('mytoken')
+
+    try:
+        payload = jwt.decode(token_receive, secret_key, algorithms=['HS256']) # token디코딩합니다.
+        userinfo = db.users.find_one({'id': payload['id']}, {'_id': 0})
+        return render_template("Main.html", user_info=userinfo)
     
-# 회원가입
-@app.route("/signup", methods=["POST"])
-def join():
-   # 사용자 정보 받아오기
-   id_recieve = request.form["id_give"]
-   pw_recieve = request.form["pw_give"]
-   name_recieve = request.form["name_give"]
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("/", msg="로그인 정보가 존재하지 않습니다."))
+'''
+* 회원가입
+* Author : 김진태
+*
+'''
+#회원가입 페이지
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
 
-   mbti_recieve = request.form["mbti_give"]
-   region_recieve = request.form["region_give"]
-   smoking_recieve = request.form["smoking_give"]
-   gender_recieve = request.form["gender_give"]
-   university_recieve = request.form["university_give"]
-   major_recieve = request.form["major_give"]
-
-   result = db.users.find_one({'id': id_recieve})
-   
-   if result is not None:
-        return jsonify({'result': 'fail', 'msg': 'ID 중복확인을 해주세요'})
-   else:
-        db.users.insert_one({'id': id_recieve, 'pw': pw_recieve, 'name_give': name_recieve, "mbti":mbti_recieve, 
-           "region":region_recieve, "smoking":smoking_recieve, "gender":gender_recieve, 
-           "university":university_recieve, "major":major_recieve, "canuse":'O'})
-        return jsonify({'result': 'success'})
+'''
+* 메인페이지
+* Author : 김병철
+*
+'''
+#메인 페이지
+@app.route('/main')
+def main():
+    return render_template('main.html', name="정글이", id="jungle02")
 
 
-if __name__ == 'main': 
-app.run(debug=True) 
+if __name__ == '__main__':
+    app.run('0.0.0.0', port=8080, debug=True)
