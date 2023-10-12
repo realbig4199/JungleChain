@@ -1,6 +1,6 @@
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask.json.provider import JSONProvider
 from flask_jwt_extended import *
 from flask_jwt_extended.config import config
@@ -43,15 +43,11 @@ app.json = CustomJSONProvider(app)
 * 
 '''
 # 초기 페이지
-
-
 @app.route('/')
 def home():
-    return render_template('login.html')
+    return render_template('login.html', title = '정글 고리')
 
 # 로그인
-
-
 @app.route('/login', methods=['POST'])
 def user_login():
     # 로그인 정보 유효성 확인 코드
@@ -59,13 +55,13 @@ def user_login():
     pw_recieve = request.form['pw_give']
 
     # id, 암호화된pw을 가지고 해당 유저를 찾습니다.
-    result = db.users.find_one({'id': id_recieve, 'pw': pw_recieve})
+    result = db.users.find_one({'user_id': id_recieve, 'user_pw': pw_recieve})
 
     # 로그인 정보 유효할 시 token 생성 후 client로 전달
     if result is not None:
         # JWT 토큰 생성
         payload = {
-            'id': id_recieve,
+            'user_id': id_recieve,
             'exp': datetime.utcnow() + timedelta(hours=60)  # 24시간 로그인 유지
         }
         token = jwt.encode(payload, secret_key, algorithm='HS256')
