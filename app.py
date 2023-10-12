@@ -117,7 +117,6 @@ def join():
         img_recieve = filename
         # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
         img_recieve = filename  # 파일 이름을 img_recieve에 할당
-        print(img_recieve)
 
     # for file in img_recieve:
     #     if file:
@@ -169,6 +168,48 @@ def mod():
 
 
 # 수정하기(수정 후 저장)
+@app.route('/mod/data', methods=['POST'])
+def mod_data():
+    id_recieve = request.form["id_give"]
+    pw_recieve = request.form["pw_give"]
+    name_recieve = request.form["name_give"]
+
+    mbti_recieve = request.form["mbti_give"]
+    region_recieve = request.form["region_give"]
+    smoking_recieve = request.form["smoking_give"]
+    gender_recieve = request.form["gender_give"]
+    university_recieve = request.form["university_give"]
+    major_recieve = request.form["major_give"]
+
+    img_recieve = request.files.getlist("files[]")
+
+    if img_recieve:
+        first_file = img_recieve[0]  # 첫 번째 파일만 가져옴.
+        # 파일 이름을 보안에 적합한 이름으로 변환
+        # filename = secure_filename(first_file.filename)
+        filename = secure_filename(first_file.filename)
+        file_path = '../static/img/' + filename  # 저장할 경로와 파일 이름을 조합
+        first_file.save(file_path)  # 파일을 서버에 저장
+        img_recieve = filename
+        # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
+        img_recieve = filename  # 파일 이름을 img_recieve에 할당
+    result = db.user.update_many({'user_id': id_recieve}, {
+        '$set': {'user_pw': pw_recieve,
+                 'user_name': name_recieve,
+                 'mbti': mbti_recieve,
+                 'region': region_recieve,
+                 'smoking': smoking_recieve,
+                 'gender': gender_recieve,
+                 'univ': university_recieve,
+                 'major': major_recieve,
+                 'img': img_recieve
+                 }})
+    # 유효성 검사
+    if result.modified_count == 1:
+        return jsonify({'result': 'success'})
+    else:
+        return jsonify({'result': 'failure'})
+
 
 # 메인 페이지
 app.route('/find')
