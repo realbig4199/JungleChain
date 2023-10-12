@@ -50,66 +50,119 @@
             reader.readAsDataURL(file);
           }
         });
-      });
+        // ID 중복 체크 확인
+        $("#userId").blur(function () {
+          var userId = $("#userId").val();
+          /* 콘솔에서 동작되는 지 확인 완료
+          console.log(userId); blur */
+          checkUserId();
 
-      // ID 중복 체크 확인 (등록 버튼에서 확인)
-      $("#userId").blur(function () {
-        console.log("afdsafdasf");
-        checkUserId(); // 함수를 호출
-      });
-
-      function checkUserId() {
-        var userId = document.getElementById("userId").value;
-        $.ajax({
-          type: "GET",
-          url: "/checkId",
-          data: { id_give: userId },
-          success: function (response) {
-            if (response == "failure") {
-              alert("아이디가 중복됩니다.");
-            }
-          },
+          function checkUserId() {
+            $.ajax({
+              type: "GET",
+              url: "/checkId",
+              data: { id_give: userId },
+              success: function (response) {
+                if (response == "failure") {
+                  alert("아이디가 중복됩니다.");
+                } else {
+                  return "success";
+                }
+              },
+            });
+          }
         });
-      }
+      });
 
       // 데이터 유효성 검사
       function checkData() {
+        var id = document.getElementById("userId").value;
         var pw = document.getElementById("password").value;
         var pw2 = document.getElementById("password2").value;
         var name = document.getElementById("userName").value;
         var mbti = document.getElementById("mbti").value;
 
-        if (name == "") {
-          alert("이름을 입력해 주세요.");
-        }
-
-        if (pw != pw2) {
+        if (id == "") {
+          alert("아이디를 입력해 주세요.");
+        } else if (pw == "" || pw2 == "") {
+          alert("패스워드를 입력해 주세요.");
+        } else if (pw != pw2) {
           alert("패스워드가 일치하지 않습니다.");
-        }
-
-        if (mbti == "") {
+        } else if (name == "") {
+          alert("이름을 입력해 주세요.");
+        } else if (mbti == "") {
           alert("MBTI를 선택해 주세요.");
+        } else {
+          // 사용자가 입력한 데이터를 변수에 저장
+          var region = $("#region").val();
+          var smoking = $("#smoke").val();
+          var gender = $("#gender").val();
+          var university = $("#university").val();
+          var major = $("#major").val();
+
+          // 이미지 파일을 선택
+          var imageFile = $("#image")[0].files[0];
+          // FormData 객체 생성
+          var formData = new FormData();
+
+          // FormData에 사용자 데이터 추가
+          formData.append("id_give", id);
+          formData.append("pw_give", pw);
+          formData.append("name_give", name);
+          formData.append("mbti_give", mbti);
+          formData.append("region_give", region);
+          formData.append("smoking_give", smoking);
+          formData.append("gender_give", gender);
+          formData.append("university_give", university);
+          formData.append("major_give", major);
+
+          // 이미지 데이터를 FormData에 추가
+          formData.append("img_give", imageFile);
+
+          // 서버로 Ajax POST 요청 보내기
+          $.ajax({
+            type: "POST",
+            url: "/join",
+            data: formData,
+            processData: false, // 필수: FormData의 데이터를 query string으로 변환하지 않음
+            contentType: false, // 필수: 컨텐츠 타입을 false로 설정하여 자동 설정 방지
+            success: function (response) {
+              if (response.result === "success") {
+                // 등록이 성공한 경우 실행할 코드 (예: 리다이렉트)
+                window.location.href = "/"; // 메인 페이지로 이동
+              } else {
+                alert("회원 가입에 실패했습니다.");
+              }
+            },
+          });
         }
       }
+      // $(document).ready(function () {
+      //   // 폼이 제출될 때 이벤트 핸들러 추가
+      //   $("#signupForm").submit(function (e) {
+      //     e.preventDefault(); // 기본 폼 제출 동작을 막음
+      //   });
+      // });
     </script>
   </head>
   <body>
-    <form class="wrapper" onsubmit="return false">
+    <form id="signupForm" class="wrapper" onsubmit="return false">
       <div class="title"><h1>회원정보를 입력해 주세요</h1></div>
       <!-- bulma로 묶어주기 -->
       <div class="media">
         <div class="media-left">
           <div id="image_container" class="image is-128x128">
-            <img name="picture_give" src="../static/default_image.jpg" alt="기본 이미지" />
+            <img src="../static/default_image.jpg" alt="기본 이미지" />
           </div>
           <button class="button is-info" id="fileButton">업로드</button>
-          <input type="file" id="image" name="image" accept="image/*" style="display: none" />
+          <input type="file" id="image" name="img_give" accept="image/*" style="display: none" />
         </div>
         <div class="media-content">
           <!-- 아이디 -->
           <div class="id">
             <i class="fa-solid fa-address-card fa-2x"></i>
             <input name="id_give" id="userId" type="text" placeholder="아이디" />
+            <div class="check_font" id="id_check"></div>
           </div>
           <!-- 비밀번호 및 비밀번호 확인 -->
           <div class="password">
