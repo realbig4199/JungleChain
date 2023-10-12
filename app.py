@@ -178,7 +178,16 @@ def mod():
             "major": data['major'],
             # "img": data['img']
         }
-        return render_template('modify.html', user_data=user_data)
+        mbti_list = list(db.tbl_cd.find(
+            {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+        region_list = list(db.tbl_cd.find(
+            {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
+        smoking_list = list(db.tbl_cd.find(
+            {'knd': 'smoking'}, {"code": "1", "cd_nm": "1"}))
+        gender_list = list(db.tbl_cd.find(
+            {'knd': 'gender'}, {"code": "1", "cd_nm": "1"}))
+
+        return render_template('modify.html', user_data=user_data, mbti_list=mbti_list, region_list=region_list, smoking_list=smoking_list, gender_list=gender_list)
     else:
         return jsonify({'result': 'failure'})
 
