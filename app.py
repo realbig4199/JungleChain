@@ -34,6 +34,9 @@ class CustomJSONProvider(JSONProvider):
 
 app.json = CustomJSONProvider(app)
 
+UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
 
 # URL 별로 함수명이 같거나,
 # route('/') 등의 주소가 같으면 안됩니다.
@@ -90,42 +93,40 @@ def check_id():
 
     return jsonify(response)
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif'])
 
 @app.route("/join", methods=["POST"])
 def join():
     # 사용자 정보 받아오기
-    id_recieve = request.form["id_give"]
-    pw_recieve = request.form["pw_give"]
+
+        
+    id_recieve   = request.form["id_give"]
+    pw_recieve   = request.form["pw_give"]
     name_recieve = request.form["name_give"]
 
     mbti_recieve = request.form["mbti_give"]
-    region_recieve = request.form["region_give"]
-    smoking_recieve = request.form["smoking_give"]
-    gender_recieve = request.form["gender_give"]
-    university_recieve = request.form["university_give"]
-    major_recieve = request.form["major_give"]
 
-    breakpoint()
-    img_recieve = request.files.getlist("files[]")
+    region_recieve  = ""
+    if "region_give" in request.form:
+        region_recieve  = request.form["region_give"]
+    smoking_recieve = ""
+    if "smoking_give" in request.form:    
+        smoking_recieve = request.form["smoking_give"]
+    gender_recieve  = ""
+    if "gender_give" in request.form:   
+        gender_recieve  = request.form["gender_give"]
 
-    if img_recieve:
-        first_file = img_recieve[0]  # 첫 번째 파일만 가져옴.
-        # 파일 이름을 보안에 적합한 이름으로 변환
-        # filename = secure_filename(first_file.filename)
-        filename = secure_filename(first_file.filename)
-        file_path = '../static/img/' + filename  # 저장할 경로와 파일 이름을 조합
-        first_file.save(file_path)  # 파일을 서버에 저장
-        img_recieve = filename
-        # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
-        img_recieve = filename  # 파일 이름을 img_recieve에 할당
-        print(img_recieve)
+    university_recieve  = request.form["university_give"]
+    major_recieve       = request.form["major_give"]
 
-    # for file in img_recieve:
-    #     if file:
-    #         filename = file.filename
-    #         print(filename)
+    img_recieve         = None
+    if "img_give" in request.files:   
+        img_recieve  = request.files['img_give']
 
     result = db.users.find_one({'id': id_recieve})
+    
 
     if result is not None:
         return jsonify({'result': 'fail', 'msg': 'ID 중복확인을 해주세요'})
@@ -140,9 +141,17 @@ def join():
             "gender": gender_recieve,
             "univ": university_recieve,
             "major": major_recieve,
-            "img": img_recieve
+            "img"  : img_recieve.filename.rsplit('.', 1)[1]
         })
-        return jsonify({'result': 'success'})
+
+        if img_recieve and allowed_file(img_recieve.filename):
+            file = img_recieve
+            filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
+            filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepathtosave)
+            return jsonify({'result': 'success'})
+        else :
+            return jsonify({'result': 'fail', 'msg': '허용되지 않는 확장자입니다.'})
 
 
 # 수정 페이지
@@ -200,7 +209,17 @@ def find():
 
 @app.route('/signup')
 def signup():
-    return render_template('signup.html')
+
+    mbti_list = list(db.tbl_cd.find({'knd': 'mbti'},{"code":"1", "cd_nm":"1"}))
+    region_list = list(db.tbl_cd.find({'knd': 'region'},{"code":"1", "cd_nm":"1"}))
+    smoking_list = list(db.tbl_cd.find({'knd': 'smoking'},{"code":"1", "cd_nm":"1"}))
+    gender_list = list(db.tbl_cd.find({'knd': 'gender'},{"code":"1", "cd_nm":"1"}))
+    return render_template('signup.html'
+                           , mbti_list = mbti_list
+                           , region_list=region_list
+                           , smoking_list=smoking_list
+                           , gender_list=gender_list
+    )
 
 
 '''

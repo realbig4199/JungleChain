@@ -93,6 +93,7 @@
         } else if (mbti == "") {
           alert("MBTI를 선택해 주세요.");
         } else {
+          /*
           // 사용자가 입력한 데이터를 변수에 저장
           var region = $("#region").val();
           var smoking = $("#smoke").val();
@@ -118,13 +119,18 @@
 
           // 이미지 데이터를 FormData에 추가
           formData.append("img_give", imageFile);
-
+          */
+          
+          var form = $("#signupForm")[0];
+          var formData = new FormData(form);
+          
           // 서버로 Ajax POST 요청 보내기
           $.ajax({
             type: "POST",
             url: "/join",
             data: formData,
             enctype: "multipart/form-data", // 파일(우리 경우에는 이미지) 전송 enctype
+            cache: false,
             processData: false, // 필수: FormData의 데이터를 query string으로 변환하지 않음
             contentType: false, // 필수: 컨텐츠 타입을 false로 설정하여 자동 설정 방지
             success: function (response) {
@@ -188,22 +194,9 @@
           <i class="fa-solid fa-thumbtack fa-2x"></i>
           <select class="full-width" name="mbti_give" id="mbti">
             <option value="" disabled selected>MBTI</option>
-            <option value="intj">INTJ</option>
-            <option value="intp">INTP</option>
-            <option value="entj">ENTJ</option>
-            <option value="entp">ENTP</option>
-            <option value="infj">INFJ</option>
-            <option value="infp">INFP</option>
-            <option value="enfj">ENFJ</option>
-            <option value="enfp">ENFP</option>
-            <option value="istj">ISTJ</option>
-            <option value="isfj">ISFJ</option>
-            <option value="estj">ESTJ</option>
-            <option value="esfj">ESFJ</option>
-            <option value="istp">ISTP</option>
-            <option value="isfp">ISFP</option>
-            <option value="estp">ESTP</option>
-            <option value="esfp">ESFP</option>
+            {% for obj in mbti_list %}
+              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            {% endfor %}
           </select>
         </div>
         <!-- 거주지 -->
@@ -211,24 +204,9 @@
           <i class="fa-solid fa-house-user fa-2x"></i>
           <select class="full-width" name="region_give" id="region">
             <option value="" disabled selected>거주지</option>
-            <option value="02">서울</option>
-            <option value="031_0">경기 북부</option>
-            <option value="031_1">경기 남부</option>
-            <option value="051">부산</option>
-            <option value="053">대구</option>
-            <option value="032">인천</option>
-            <option value="062">광주</option>
-            <option value="042">대전</option>
-            <option value="052">울산</option>
-            <option value="044">세종</option>
-            <option value="031">강원</option>
-            <option value="043">충북</option>
-            <option value="041">충남</option>
-            <option value="063">전북</option>
-            <option value="061">전남</option>
-            <option value="054">경북</option>
-            <option value="055">경남</option>
-            <option value="064">제주</option>
+            {% for obj in region_list %}
+              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            {% endfor %}
           </select>
         </div>
         <!-- 흡연 여부 -->
@@ -236,8 +214,9 @@
           <i class="fa-solid fa-smoking fa-2x"></i>
           <select class="full-width" name="smoking_give" id="smoke">
             <option value="" disabled selected>흡연</option>
-            <option value="yes">예</option>
-            <option value="no">아니오</option>
+            {% for obj in smoking_list %}
+              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            {% endfor %}
           </select>
         </div>
         <!-- 성별 -->
@@ -245,8 +224,9 @@
           <i class="fa-solid fa-venus-double fa-2x"></i>
           <select class="full-width" name="gender_give" id="gender">
             <option value="" disabled selected>성별</option>
-            <option value="man">남자</option>
-            <option value="women">여자</option>
+            {% for obj in gender_list %}
+              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            {% endfor %}
           </select>
         </div>
         <!-- 학교 -->
@@ -261,7 +241,7 @@
         </div>
       </div>
       <div class="buttons">
-        <button type="submit" class="btn btn-primary" onclick="checkData()">등록</button>
+        <button class="btn btn-primary" onclick="checkData()">등록</button>
         <button class="btn btn-primary">취소</button>
       </div>
     </form>
