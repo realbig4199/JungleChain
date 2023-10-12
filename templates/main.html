@@ -218,14 +218,18 @@
             }
             
             /*----------------------------------------------------------------------*/
-            
+            function openPop(targetId){ 
+                window.open(
+                    "/mod?id="+$(targetId).attr("id"), "_blank", "popup"
+                ); 
+            }
         </script>
     </head>
     <body>
         <div class="mx-auto sorter-box mt-4">
             <div class="" style="height: 85px;">
                 <div class="" style="height: 50%;">
-                    <a href="#" class="btn btn-primary" id="" onclick="" style="float:left">
+                    <a href="#" class="btn btn-primary" id="{{id}}" onclick="openPop(this)" style="float:left">
                         정보 수정
                     </a>
                     <a href="/logout" class="btn btn-primary" id="btn_logout" onclick="" style="float:right">

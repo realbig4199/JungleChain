@@ -43,11 +43,15 @@ app.json = CustomJSONProvider(app)
 * 
 '''
 # 초기 페이지
+
+
 @app.route('/')
 def home():
-    return render_template('login.html', title = '정글 고리')
+    return render_template('login.html', title='정글 고리')
 
 # 로그인
+
+
 @app.route('/login', methods=['POST'])
 def user_login():
     # 로그인 정보 유효성 확인 코드
@@ -79,7 +83,11 @@ def user_login():
 @app.route('/checkId')
 def check_id():
     id_receive = request.args.get('id_give')
+<<<<<<< HEAD
     
+=======
+    # 컬렉션 추후 users에서 user로 바꿔야 함.
+>>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
     user = db.user.find_one({'user_id': id_receive})
     if user:
         response = {'result': 'failure'}
@@ -143,18 +151,30 @@ def join():
 
 
 # 수정 페이지
-@app.route('/mod', methods=['POST'])
+@app.route('/mod', methods=['GET'])
 def mod():
-    user_id = request.form['user_id']
-    data = db.users.find_one({'id': user_id})
-
+    user_id = request.args.get('id')
+    data = db.user.find_one({'user_id': user_id})
     if data:
-        return render_template('modify.html', user_data=data)
+        # Flask 템플릿에 전달할 데이터 설정
+        user_data = {
+            'user_id': data['user_id'],
+            'user_pw': data['user_pw'],
+            'user_name': data['user_name'],
+            "mbti": data['mbti'],
+            "region": data['region'],
+            "smoking": data['smoking'],
+            "gender": data['gender'],
+            "univ": data['univ'],
+            "major": data['major'],
+            # "img": data['img']
+        }
+        return render_template('modify.html', user_data=user_data)
     else:
         return jsonify({'result': 'failure'})
 
 
-# 수정하기
+# 수정하기(수정 후 저장)
 
 # 메인 페이지
 @app.route('/find')
@@ -194,10 +214,12 @@ def signup():
 *
 '''
 # 메인 페이지
+
+
 @app.route('/main')
 def main():
 
-    #[FIXME] JWT 인증 기능 구현 필요
+    # [FIXME] JWT 인증 기능 구현 필요
 
     return render_template('main.html', name="정글이", id="jungle")
 
@@ -206,8 +228,8 @@ def main():
 def getNetworkGraph():
     jsonData = json.loads(request.data)
 
-    my_data = db.user.find_one({'user_id' : 'jungle'})
-    
+    my_data = db.user.find_one({'user_id': 'jungle'})
+
     mbti_flag = jsonData.get('mbtiBtn')
     region_flag = jsonData.get('locBtn')
     univ_flag = jsonData.get('schoolBtn')
@@ -219,7 +241,7 @@ def getNetworkGraph():
     friend_data = {}
 
     queryString = {
-        'user_id' : { '$ne' : 'jungle' }
+        'user_id': {'$ne': 'jungle'}
     }
     if mbti_flag:
         queryString['mbti'] = my_data["mbti"]
@@ -229,12 +251,12 @@ def getNetworkGraph():
             user_id = data_set["user_id"]
             if "img" in data_set:
                 img_id = data_set["img"]
-            else :
+            else:
                 img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
-            else :
+            else:
                 result_data[user_id] += 1
         del queryString['mbti']
 
@@ -246,12 +268,12 @@ def getNetworkGraph():
             user_id = data_set["user_id"]
             if "img" in data_set:
                 img_id = data_set["img"]
-            else :
+            else:
                 img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
-            else :
+            else:
                 result_data[user_id] += 1
 
         del queryString['region']
@@ -263,12 +285,12 @@ def getNetworkGraph():
             user_id = data_set["user_id"]
             if "img" in data_set:
                 img_id = data_set["img"]
-            else :
+            else:
                 img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
-            else :
+            else:
                 result_data[user_id] += 1
 
         del queryString['smoking']
@@ -276,17 +298,17 @@ def getNetworkGraph():
     if univ_flag:
         queryString['univ'] = my_data['univ']
         univ_data = list(db.user.find(queryString))
-        
+
         for data_set in univ_data:
             user_id = data_set["user_id"]
             if "img" in data_set:
                 img_id = data_set["img"]
-            else :
+            else:
                 img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
-            else :
+            else:
                 result_data[user_id] += 1
 
         del queryString['univ']
@@ -294,19 +316,19 @@ def getNetworkGraph():
     if major_flag:
         queryString['major'] = my_data['major']
         major_data = list(db.user.find(queryString))
-        
+
         for data_set in major_data:
             user_id = data_set["user_id"]
 
             if "img" in data_set:
                 img_id = data_set["img"]
-            else :
+            else:
                 img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
 
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
-            else :
+            else:
                 result_data[user_id] += 1
 
         del queryString['major']
@@ -314,21 +336,20 @@ def getNetworkGraph():
     if gender_flag:
         queryString['gender'] = my_data['gender']
         gender_data = list(db.user.find(queryString))
-        
+
         for data_set in gender_data:
             user_id = data_set["user_id"]
             if "img" in data_set:
                 img_id = data_set["img"]
-            else :
+            else:
                 img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
             if user_id not in result_data:
                 result_data[user_id] = 1
                 friend_data[user_id] = img_id
-            else :
+            else:
                 result_data[user_id] += 1
 
         del queryString['gender']
-
 
     '''
     #합산 시작
@@ -337,14 +358,15 @@ def getNetworkGraph():
         data_set.
     '''
 
-
-    response = {'result': 'success', "sort" : "", "resultData" : result_data, "friendData" : friend_data}
+    response = {'result': 'success', "sort": "",
+                "resultData": result_data, "friendData": friend_data}
     return jsonify(response)
+
 
 @app.route('/logout')
 def logout():
 
-    #[FIXME] 로그아웃 JWT 제거 구현 필요
+    # [FIXME] 로그아웃 JWT 제거 구현 필요
 
     return render_template('login.html')
 
