@@ -154,45 +154,45 @@
         <div>
           <i class="fa-solid fa-house-user fa-2x"></i>
           <select class="full-width" name="region_give" id="region">
-            <option value="" disabled selected>거주지</option>
-            <option value="02">서울</option>
-            <option value="031_0">경기 북부</option>
-            <option value="031_1">경기 남부</option>
-            <option value="051">부산</option>
-            <option value="053">대구</option>
-            <option value="032">인천</option>
-            <option value="062">광주</option>
-            <option value="042">대전</option>
-            <option value="052">울산</option>
-            <option value="044">세종</option>
-            <option value="031">강원</option>
-            <option value="043">충북</option>
-            <option value="041">충남</option>
-            <option value="063">전북</option>
-            <option value="061">전남</option>
-            <option value="054">경북</option>
-            <option value="055">경남</option>
-            <option value="064">제주</option>
+              <option value="" disabled>거주지</option>
+              <option value="02" {% if user_data.region == '02' %}selected{% endif %}>서울</option>
+              <option value="031_0" {% if user_data.region == '031_0' %}selected{% endif %}>경기 북부</option>
+              <option value="031_1" {% if user_data.region == '031_1' %}selected{% endif %}>경기 남부</option>
+              <option value="051" {% if user_data.region == '051' %}selected{% endif %}>부산</option>
+              <option value="053" {% if user_data.region == '053' %}selected{% endif %}>대구</option>
+              <option value="032" {% if user_data.region == '032' %}selected{% endif %}>인천</option>
+              <option value="062" {% if user_data.region == '062' %}selected{% endif %}>광주</option>
+              <option value="042" {% if user_data.region == '042' %}selected{% endif %}>대전</option>
+              <option value="052" {% if user_data.region == '052' %}selected{% endif %}>울산</option>
+              <option value="044" {% if user_data.region == '044' %}selected{% endif %}>세종</option>
+              <option value="031" {% if user_data.region == '031' %}selected{% endif %}>강원</option>
+              <option value="043" {% if user_data.region == '043' %}selected{% endif %}>충북</option>
+              <option value="041" {% if user_data.region == '041' %}selected{% endif %}>충남</option>
+              <option value="063" {% if user_data.region == '063' %}selected{% endif %}>전북</option>
+              <option value="061" {% if user_data.region == '061' %}selected{% endif %}>전남</option>
+              <option value="054" {% if user_data.region == '054' %}selected{% endif %}>경북</option>
+              <option value="055" {% if user_data.region == '055' %}selected{% endif %}>경남</option>
+              <option value="064" {% if user_data.region == '064' %}selected{% endif %}>제주</option>
           </select>
-        </div>
+      </div>
         <!-- 흡연 여부 -->
         <div>
           <i class="fa-solid fa-smoking fa-2x"></i>
           <select class="full-width" name="smoking_give" id="smoke">
-            <option value="" disabled selected>흡연</option>
-            <option value="yes">예</option>
-            <option value="no">아니오</option>
+              <option value="" disabled>흡연</option>
+              <option value="yes" {% if user_data.smoking == 'yes' %}selected{% endif %}>예</option>
+              <option value="no" {% if user_data.smoking == 'no' %}selected{% endif %}>아니오</option>
           </select>
-        </div>
+      </div>
         <!-- 성별 -->
         <div>
           <i class="fa-solid fa-venus-double fa-2x"></i>
           <select class="full-width" name="gender_give" id="gender">
-            <option value="" disabled selected>성별</option>
-            <option value="man">남자</option>
-            <option value="women">여자</option>
+              <option value="" disabled>성별</option>
+              <option value="man" {% if user_data.gender == 'man' %}selected{% endif %}>남자</option>
+              <option value="woman" {% if user_data.gender == 'woman' %}selected{% endif %}>여자</option>
           </select>
-        </div>
+      </div>
         <!-- 학교 -->
         <div>
           <i class="fa-solid fa-address-card fa-2x"></i>
