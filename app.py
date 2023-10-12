@@ -59,7 +59,7 @@ def home():
 def user_login():
     # 로그인 정보 유효성 확인 코드
     jsonData = json.loads(request.data)
-    
+
     id_recieve = jsonData.get('id_give')
     pw_recieve = jsonData.get('pw_give')
 
@@ -87,7 +87,7 @@ def user_login():
 # def check_id():
 #     id_receive = request.args.get('id_give')
 # <<<<<<< HEAD
-    
+
 # =======
 #     # 컬렉션 추후 users에서 user로 바꿔야 함.
 # >>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
@@ -103,6 +103,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif'])
 
+
 @app.route("/join", methods=["POST"])
 def join():
     # 사용자 정보 받아오기
@@ -112,22 +113,22 @@ def join():
 
     mbti_recieve = request.form["mbti_give"]
 
-    region_recieve  = ""
+    region_recieve = ""
     if "region_give" in request.form:
-        region_recieve  = request.form["region_give"]
+        region_recieve = request.form["region_give"]
     smoking_recieve = ""
-    if "smoking_give" in request.form:    
+    if "smoking_give" in request.form:
         smoking_recieve = request.form["smoking_give"]
-    gender_recieve  = ""
-    if "gender_give" in request.form:   
-        gender_recieve  = request.form["gender_give"]
+    gender_recieve = ""
+    if "gender_give" in request.form:
+        gender_recieve = request.form["gender_give"]
 
-    university_recieve  = request.form["university_give"]
-    major_recieve       = request.form["major_give"]
+    university_recieve = request.form["university_give"]
+    major_recieve = request.form["major_give"]
 
-    img_recieve         = None
-    if "img_give" in request.files:   
-        img_recieve  = request.files['img_give']
+    img_recieve = None
+    if "img_give" in request.files:
+        img_recieve = request.files['img_give']
 
     result = db.user.find_one({'id': id_recieve})
     
@@ -199,6 +200,48 @@ def mod():
 
 
 # 수정하기(수정 후 저장)
+@app.route('/mod/data', methods=['POST'])
+def mod_data():
+    id_recieve = request.form["id_give"]
+    pw_recieve = request.form["pw_give"]
+    name_recieve = request.form["name_give"]
+
+    mbti_recieve = request.form["mbti_give"]
+    region_recieve = request.form["region_give"]
+    smoking_recieve = request.form["smoking_give"]
+    gender_recieve = request.form["gender_give"]
+    university_recieve = request.form["university_give"]
+    major_recieve = request.form["major_give"]
+
+    img_recieve = request.files.getlist("files[]")
+
+    if img_recieve:
+        first_file = img_recieve[0]  # 첫 번째 파일만 가져옴.
+        # 파일 이름을 보안에 적합한 이름으로 변환
+        # filename = secure_filename(first_file.filename)
+        filename = secure_filename(first_file.filename)
+        file_path = '../static/img/' + filename  # 저장할 경로와 파일 이름을 조합
+        first_file.save(file_path)  # 파일을 서버에 저장
+        img_recieve = filename
+        # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
+        img_recieve = filename  # 파일 이름을 img_recieve에 할당
+    result = db.user.update_many({'user_id': id_recieve}, {
+        '$set': {'user_pw': pw_recieve,
+                 'user_name': name_recieve,
+                 'mbti': mbti_recieve,
+                 'region': region_recieve,
+                 'smoking': smoking_recieve,
+                 'gender': gender_recieve,
+                 'univ': university_recieve,
+                 'major': major_recieve,
+                 'img': img_recieve
+                 }})
+    # 유효성 검사
+    if result.modified_count == 1:
+        return jsonify({'result': 'success'})
+    else:
+        return jsonify({'result': 'failure'})
+
 
 # 메인 페이지
 @app.route('/find')
@@ -209,7 +252,8 @@ def find():
         # token디코딩합니다.
         payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
         myuser = db.user.find_one({'user_id': payload['user_id']})
-        userinfo = {'user_id':myuser['user_id'], 'user_name':myuser['user_name'], 'user_token':token_receive}
+        userinfo = {'user_id': myuser['user_id'],
+                    'user_name': myuser['user_name'], 'user_token': token_receive}
         breakpoint()
         print(userinfo)
         return render_template("main.html", user_info=userinfo)
@@ -231,16 +275,16 @@ def find():
 @app.route('/signup')
 def signup():
 
-    mbti_list = list(db.tbl_cd.find({'knd': 'mbti'},{"code":"1", "cd_nm":"1"}))
-    region_list = list(db.tbl_cd.find({'knd': 'region'},{"code":"1", "cd_nm":"1"}))
-    smoking_list = list(db.tbl_cd.find({'knd': 'smoking'},{"code":"1", "cd_nm":"1"}))
-    gender_list = list(db.tbl_cd.find({'knd': 'gender'},{"code":"1", "cd_nm":"1"}))
-    return render_template('signup.html'
-                           , mbti_list = mbti_list
-                           , region_list=region_list
-                           , smoking_list=smoking_list
-                           , gender_list=gender_list
-    )
+    mbti_list = list(db.tbl_cd.find(
+        {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+    region_list = list(db.tbl_cd.find(
+        {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
+    smoking_list = list(db.tbl_cd.find(
+        {'knd': 'smoking'}, {"code": "1", "cd_nm": "1"}))
+    gender_list = list(db.tbl_cd.find(
+        {'knd': 'gender'}, {"code": "1", "cd_nm": "1"}))
+    return render_template('signup.html', mbti_list=mbti_list, region_list=region_list, smoking_list=smoking_list, gender_list=gender_list
+                           )
 
 
 '''
