@@ -124,7 +124,6 @@
             <i class="fa-solid fa-user fa-2x"></i>
             <input name="name_give" id="userName" type="text" value="{{ user_data.user_name }}" />
           </div>
-          <div></div>
         </div>
       </div>
       <div class="article">
@@ -132,12 +131,23 @@
         <div>
           <i class="fa-solid fa-thumbtack fa-2x"></i>
           <select class="full-width" name="mbti_give" id="mbti">
-            <option value="" disabled selected>MBTI</option>
-            <option value="intj">INTJ</option>
-            <option value="intp">INTP</option>
-            <option value="entj">ENTJ</option>
-            <option value="entp">ENTP</option>
-            <option value="infj">INFJ</option>
+            <option value="" disabled>MBTI</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intp" {% if user_data.mbti == 'intp' %}selected{% endif %}>INTP</option>
+            <option value="entj" {% if user_data.mbti == 'entj' %}selected{% endif %}>ENTJ</option>
+            <option value="entp" {% if user_data.mbti == 'entp' %}selected{% endif %}>ENTP</option>
+            <option value="infj" {% if user_data.mbti == 'infj' %}selected{% endif %}>INFJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+            <option value="intj" {% if user_data.mbti == 'intj' %}selected{% endif %}>INTJ</option>
+
             <option value="infp">INFP</option>
             <option value="enfj">ENFJ</option>
             <option value="enfp">ENFP</option>
