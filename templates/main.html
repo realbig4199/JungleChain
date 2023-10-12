@@ -11,102 +11,61 @@
         <!-- D3.js -->
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
 
-        <link href="../static/main.css" rel="stylesheet" />
+        <link href="../static/css/main.css" rel="stylesheet" />
         <title>정글고리</title>
         <script>
+            const BTN_LIST = {
+                "mbtiBtn"   : false,
+                "locBtn"    : false,
+                "schoolBtn" : false,
+                "majBtn"    : false,
+                "genBtn"    : false,
+                "smkBtn"    : false
+            }
+
             $(document).ready(function () {
                 $('#mbtiBtn').click();
-                networkGraph.createGraph();
             });
-            var NETWORK_DATA = {
-                "nodes": [
-                    {
-                        "id": "나",
-                        "value": 10,
-                        "group": "user",
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구1",
-                        "value": 3,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구2",
-                        "value": 3,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구3",
-                        "value": 4,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구4",
-                        "value": 4,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구5",
-                        "value": 5,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구6",
-                        "value": 6,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구7",
-                        "value": 4,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+
+            function setGraph(friendData, resultData){
+                
+                NETWORK_DATA = {
+                    "nodes" : [
+                        {
+                            "id"    : 'jungle',
+                            "value" : 10,
+                            "group" : "user",
+                            "img"   : "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                        }
+                    ] , "links": []
+                }
+
+                for(key in friendData){
+                    
+                    dataSet = {
+                        "id"    : key,
+                        "value" : 3,
+                        "group" : null,
+                        "img"   : friendData[key]
                     }
-                ],
-                "links": [
-                    {
-                        "source": "나",
-                        "target": "친구1",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구2",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구3",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구4",
-                        "value": 4
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구5",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구6",
-                        "value": 2
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구7",
-                        "value": 3
+                    NETWORK_DATA["nodes"].push(dataSet);
+                }
+                
+                for(key in resultData){
+                    
+                    linkSet = {
+                        "source"     : 'jungle',
+                        "target"     : key,
+                        "value"      : 5,
+                        "lineColor" : Number(resultData[key]) >= 3? 'red': Number(resultData[key]) == 2? 'green':  'blue'
                     }
-                    ]
-                };
+                    NETWORK_DATA["links"].push(linkSet);
+                }
+
+                networkGraph.createGraph();
+            }
+
+            var NETWORK_DATA = {};
 
             /*----------------------------------------------------------------------*/
             
@@ -120,34 +79,39 @@
                     selectId.addClass('active')
                 }
 
-                selectArr = [];
                 $('.accoBtn').each(function(idx, item){
                     if($(this).hasClass('active')){
                         target = $(this).attr("id");
-                        selectArr.push(target);
+                        if(BTN_LIST[target] == false){
+                            BTN_LIST[target] = true
+                        } 
+                    } else {
+                        target = $(this).attr("id");
+                        BTN_LIST[target] = false
                     }
                 });
-                return ;
-                getAcco(selectArr);
+                
+                getGraph(BTN_LIST);
             }
 
-            function getAcco(arrData) {
+            function getGraph(jsonData) {
                 $.ajax({
                     type: "POST",
-                    url: "/api/getAcco",
-                    traditional : true,
-                    data: {'arr': arrData},
+                    url: "/main/search",
+                    contentType : "application/json",
+                    data: JSON.stringify(jsonData),
                     success: function (response) {
                         if (response['result'] == 'success') {
-
+                            $(".g-holder").remove();
+                            setGraph(response['friendData'], response['resultData']);
                         } else {
                             
                         }
                     }
                 });
             }
-            /******** network graph ********/
 
+            /******** network graph ********/
             var networkGraph = {
                 createGraph : function(){
                     var links = NETWORK_DATA.links.map(function(d){
@@ -177,23 +141,21 @@
                             .force("center", d3.forceCenter(width / 2, height / 2))
                             .force("collide",d3.forceCollide().radius( function(d){ return d.value*8}) );
 
-                    //simulation.stop(); // stop 필요한가?
-
 
                     var svg = d3.select("#NETWORK_GRAPH")
                                 .attr("viewBox", [0, 0, width, height]);
                     var gHolder = svg.append("g")
-                                        .attr("class", "g-holder");
+                                    .attr("class", "g-holder");
                     var link = gHolder.append("g")
-                                    .attr("stroke", "#999")
                                     .attr("stroke-opacity", 0.6)
-                                .selectAll("line")
+                                    .selectAll("line")
                                     .data(links)
                                     .join("line")
-                                        .attr("stroke-width", function(d){ return Math.sqrt(d.value*5)} );
+                                    .attr("stroke", function(d){ return d.lineColor})
+                                    .attr("stroke-width", function(d){ return Math.sqrt(d.value*5)} )
                     var defs = svg.append('svg:defs');
                     var config = {
-                        "avatar_size": 60
+                        "avatar_size": 70
                     }
 
                     var node = gHolder.append("g")
@@ -215,7 +177,7 @@
                                     .attr('xlink:href',d.img)
                                     .attr('width',config.avatar_size)
                                     .attr('height',config.avatar_size)
-                                    .attr('transform','translate('+parseInt(-60+config.avatar_size/2)+','+parseInt(-60+config.avatar_size/2)+')')
+                                    .attr('transform','translate('+parseInt(-70+config.avatar_size/2)+','+parseInt(-70+config.avatar_size/2)+')')
                                     .attr('clip-path','url(#clipObj)');
                                 }).call(networkGraph.drag(simulation));
 
@@ -225,15 +187,8 @@
                             .attr("x2", function(d){ return d.target.x; })
                             .attr("y2", function(d){ return d.target.y; });
 
-                        /*node
-                            .attr("cx", function(d){ return d.x; })
-                            .attr("cy", function(d){ return d.y; });*/
-
-                        //circle 노드에서 g 노드로 변경
                         node.attr("transform", function(d) { return "translate("+d.x+","+ d.y+")"; });
                     });
-
-                    //invalidation.then(() => simulation.stop());
 
                     return svg.node();
                 },
@@ -262,8 +217,8 @@
                 }
             }
             
-
             /*----------------------------------------------------------------------*/
+            
         </script>
     </head>
     <body>
@@ -273,7 +228,7 @@
                     <a href="#" class="btn btn-primary" id="" onclick="" style="float:left">
                         정보 수정
                     </a>
-                    <a href="#" class="btn btn-primary" id="" onclick="" style="float:right">
+                    <a href="/logout" class="btn btn-primary" id="btn_logout" onclick="" style="float:right">
                         로그아웃
                     </a>
                 </div>
