@@ -11,7 +11,7 @@
         <!-- D3.js -->
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
 
-        <link href="../static/main.css" rel="stylesheet" />
+        <link href="../static/css/main.css" rel="stylesheet" />
         <title>정글고리</title>
         <script>
             const BTN_LIST = {
@@ -27,123 +27,45 @@
                 $('#mbtiBtn').click();
             });
 
-            function setGraph(json){
-                NETWORK_DATA = "";
-
-                for(var i=0; i< json.data.length; i++){
-                    item = json.data[i];
-                    
-                    dataSet = {
-                        "id"    : item.id,
-                        "value" : item.value,
-                        "group" : item.group,
-                        "img"   : item.img
-                    }
-                    ETWORK_DATA["nodes"].push(dataSet);
+            function setGraph(friendData, resultData){
+                
+                NETWORK_DATA = {
+                    "nodes" : [
+                        {
+                            "id"    : 'jungle',
+                            "value" : 10,
+                            "group" : "user",
+                            "img"   : "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+                        }
+                    ] , "links": []
                 }
 
-                for(var i=0; i< json.link.length; i++){
-                    line = json.link[i];
-                    linkSet = {
-                        "source"    : line.source,
-                        "target"    : line.target,
-                        "value"     : line.value
+                for(key in friendData){
+                    
+                    dataSet = {
+                        "id"    : key,
+                        "value" : 3,
+                        "group" : null,
+                        "img"   : friendData[key]
                     }
-                    ETWORK_DATA["links"].push(linkSet);
+                    NETWORK_DATA["nodes"].push(dataSet);
+                }
+                
+                for(key in resultData){
+                    
+                    linkSet = {
+                        "source"     : 'jungle',
+                        "target"     : key,
+                        "value"      : 5,
+                        "lineColor" : Number(resultData[key]) >= 3? 'red': Number(resultData[key]) == 2? 'green':  'blue'
+                    }
+                    NETWORK_DATA["links"].push(linkSet);
                 }
 
                 networkGraph.createGraph();
             }
 
-            var NETWORK_DATA = {
-                "nodes": [
-                    {
-                        "id": "나",
-                        "value": 10,
-                        "group": "user",
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구1",
-                        "value": 3,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구2",
-                        "value": 3,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구3",
-                        "value": 4,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구4",
-                        "value": 4,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구5",
-                        "value": 5,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구6",
-                        "value": 6,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    },
-                    {
-                        "id": "친구7",
-                        "value": 4,
-                        "group": null,
-                        "img": "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
-                    }
-                ],
-                "links": [
-                    {
-                        "source": "나",
-                        "target": "친구1",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구2",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구3",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구4",
-                        "value": 4
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구5",
-                        "value": 1
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구6",
-                        "value": 2
-                    },
-                    {
-                        "source": "나",
-                        "target": "친구7",
-                        "value": 3
-                    }
-                    ]
-                };
+            var NETWORK_DATA = {};
 
             /*----------------------------------------------------------------------*/
             
@@ -165,7 +87,7 @@
                         } 
                     } else {
                         target = $(this).attr("id");
-                        BTN_LIST[target] == false
+                        BTN_LIST[target] = false
                     }
                 });
                 
@@ -173,28 +95,23 @@
             }
 
             function getGraph(jsonData) {
-                console.log(jsonData);
                 $.ajax({
                     type: "POST",
                     url: "/main/search",
                     contentType : "application/json",
                     data: JSON.stringify(jsonData),
                     success: function (response) {
-                        console.log(response);
-                        return ;
-
                         if (response['result'] == 'success') {
-                            setGraph(json);
+                            $(".g-holder").remove();
+                            setGraph(response['friendData'], response['resultData']);
                         } else {
                             
                         }
                     }
                 });
             }
-            
 
             /******** network graph ********/
-
             var networkGraph = {
                 createGraph : function(){
                     var links = NETWORK_DATA.links.map(function(d){
@@ -228,17 +145,17 @@
                     var svg = d3.select("#NETWORK_GRAPH")
                                 .attr("viewBox", [0, 0, width, height]);
                     var gHolder = svg.append("g")
-                                        .attr("class", "g-holder");
+                                    .attr("class", "g-holder");
                     var link = gHolder.append("g")
-                                    .attr("stroke", "#999")
                                     .attr("stroke-opacity", 0.6)
-                                .selectAll("line")
+                                    .selectAll("line")
                                     .data(links)
                                     .join("line")
-                                        .attr("stroke-width", function(d){ return Math.sqrt(d.value*5)} );
+                                    .attr("stroke", function(d){ return d.lineColor})
+                                    .attr("stroke-width", function(d){ return Math.sqrt(d.value*5)} )
                     var defs = svg.append('svg:defs');
                     var config = {
-                        "avatar_size": 60
+                        "avatar_size": 70
                     }
 
                     var node = gHolder.append("g")
@@ -260,7 +177,7 @@
                                     .attr('xlink:href',d.img)
                                     .attr('width',config.avatar_size)
                                     .attr('height',config.avatar_size)
-                                    .attr('transform','translate('+parseInt(-60+config.avatar_size/2)+','+parseInt(-60+config.avatar_size/2)+')')
+                                    .attr('transform','translate('+parseInt(-70+config.avatar_size/2)+','+parseInt(-70+config.avatar_size/2)+')')
                                     .attr('clip-path','url(#clipObj)');
                                 }).call(networkGraph.drag(simulation));
 

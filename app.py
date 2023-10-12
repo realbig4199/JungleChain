@@ -153,13 +153,15 @@ def main():
 
     #[FIXME] JWT 인증 기능 구현 필요
 
-    return render_template('main.html', name="정글이", id="jungle02")
+    return render_template('main.html', name="정글이", id="jungle")
 
 
 @app.route('/main/search', methods=['POST'])
 def getNetworkGraph():
     jsonData = json.loads(request.data)
 
+    my_data = db.user.find_one({'user_id' : 'jungle'})
+    
     mbti_flag = jsonData.get('mbtiBtn')
     region_flag = jsonData.get('locBtn')
     univ_flag = jsonData.get('schoolBtn')
@@ -167,9 +169,130 @@ def getNetworkGraph():
     gender_flag = jsonData.get('genBtn')
     smoking_flag = jsonData.get('smkBtn')
 
-    
+    result_data = {}
+    friend_data = {}
 
-    response = {'result': 'success', "sort" : ""}
+    queryString = {
+        'user_id' : { '$ne' : 'jungle' }
+    }
+    if mbti_flag:
+        queryString['mbti'] = my_data["mbti"]
+        mbti_data = list(db.user.find(queryString))
+
+        for data_set in mbti_data:
+            user_id = data_set["user_id"]
+            if "img" in data_set:
+                img_id = data_set["img"]
+            else :
+                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+            if user_id not in result_data:
+                result_data[user_id] = 1
+                friend_data[user_id] = img_id
+            else :
+                result_data[user_id] += 1
+        del queryString['mbti']
+
+    if region_flag:
+        queryString['region'] = my_data["region"]
+        region_data = list(db.user.find(queryString))
+
+        for data_set in region_data:
+            user_id = data_set["user_id"]
+            if "img" in data_set:
+                img_id = data_set["img"]
+            else :
+                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+            if user_id not in result_data:
+                result_data[user_id] = 1
+                friend_data[user_id] = img_id
+            else :
+                result_data[user_id] += 1
+
+        del queryString['region']
+    if smoking_flag:
+        queryString['smoking'] = my_data['smoking']
+        smoking_data = list(db.user.find(queryString))
+
+        for data_set in smoking_data:
+            user_id = data_set["user_id"]
+            if "img" in data_set:
+                img_id = data_set["img"]
+            else :
+                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+            if user_id not in result_data:
+                result_data[user_id] = 1
+                friend_data[user_id] = img_id
+            else :
+                result_data[user_id] += 1
+
+        del queryString['smoking']
+
+    if univ_flag:
+        queryString['univ'] = my_data['univ']
+        univ_data = list(db.user.find(queryString))
+        
+        for data_set in univ_data:
+            user_id = data_set["user_id"]
+            if "img" in data_set:
+                img_id = data_set["img"]
+            else :
+                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+            if user_id not in result_data:
+                result_data[user_id] = 1
+                friend_data[user_id] = img_id
+            else :
+                result_data[user_id] += 1
+
+        del queryString['univ']
+
+    if major_flag:
+        queryString['major'] = my_data['major']
+        major_data = list(db.user.find(queryString))
+        
+        for data_set in major_data:
+            user_id = data_set["user_id"]
+
+            if "img" in data_set:
+                img_id = data_set["img"]
+            else :
+                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+
+            if user_id not in result_data:
+                result_data[user_id] = 1
+                friend_data[user_id] = img_id
+            else :
+                result_data[user_id] += 1
+
+        del queryString['major']
+
+    if gender_flag:
+        queryString['gender'] = my_data['gender']
+        gender_data = list(db.user.find(queryString))
+        
+        for data_set in gender_data:
+            user_id = data_set["user_id"]
+            if "img" in data_set:
+                img_id = data_set["img"]
+            else :
+                img_id = "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
+            if user_id not in result_data:
+                result_data[user_id] = 1
+                friend_data[user_id] = img_id
+            else :
+                result_data[user_id] += 1
+
+        del queryString['gender']
+
+
+    '''
+    #합산 시작
+    if
+    for data_set in mbti_data:
+        data_set.
+    '''
+
+
+    response = {'result': 'success', "sort" : "", "resultData" : result_data, "friendData" : friend_data}
     return jsonify(response)
 
 @app.route('/logout')
