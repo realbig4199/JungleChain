@@ -32,7 +32,7 @@
                 NETWORK_DATA = {
                     "nodes" : [
                         {
-                            "id"    : 'jungle',
+                            "id"    : $("#user_info").val(),
                             "value" : 10,
                             "group" : "user",
                             "img"   : "https://cdn4.iconfinder.com/data/icons/seo-and-data/500/pencil-gear-128.png"
@@ -54,7 +54,7 @@
                 for(key in resultData){
                     
                     linkSet = {
-                        "source"     : 'jungle',
+                        "source"     : $("#user_info").val(),
                         "target"     : key,
                         "value"      : 5,
                         "lineColor" : Number(resultData[key]) >= 3? 'red': Number(resultData[key]) == 2? 'green':  'blue'
@@ -228,8 +228,9 @@
     <body>
         <div class="mx-auto sorter-box mt-4">
             <div class="" style="height: 85px;">
+                <input type="hidden" value="{{user_id}}" id="user_info"/>
                 <div class="" style="height: 50%;">
-                    <a href="#" class="btn btn-primary" id="{{id}}" onclick="openPop(this)" style="float:left">
+                    <a href="#" class="btn btn-primary" id="{{user_id}}" onclick="openPop(this)" style="float:left">
                         정보 수정
                     </a>
                     <a href="/logout" class="btn btn-primary" id="btn_logout" onclick="" style="float:right">
@@ -238,10 +239,10 @@
                 </div>
                 <div class="" style="height: 39%; border-top: 2px solid skyblue; border-bottom: 2px solid skyblue;">
                     <div style="width: 50%; float:left; text-align: center;">
-                        <span >아이디 : {{id}}</span>
+                        <span >아이디 : {{user_id}}</span>
                     </div>
                     <div style="width: 50%; float:left; text-align: center;">
-                        <span>이름 : {{name}}</span>
+                        <span>이름 : {{user_name}}</span>
                     </div>
                 </div>
             </div>

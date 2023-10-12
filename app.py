@@ -263,9 +263,7 @@ def find():
         myuser = db.user.find_one({'user_id': payload['user_id']})
         userinfo = {'user_id': myuser['user_id'],
                     'user_name': myuser['user_name'], 'user_token': token_receive}
-        breakpoint()
-        print(userinfo)
-        return render_template("main.html", user_info=userinfo)
+        return render_template("main.html", user_id=userinfo['user_id'], user_name=userinfo['user_name'])
 
     except jwt.ExpiredSignatureError:
         return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
