@@ -22,14 +22,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
 
     <!-- CSS 연결 -->
-    <link href="../static/signup.css" rel="stylesheet" />
+    <link href="../static/css/signup.css" rel="stylesheet" />
 
     <title>정글 고리</title>
 
     <!-- JavaScript -->
     <script>
       $(document).ready(function () {
-        // 파일 선택 버튼을 클릭하면 파일 입력란을 클릭
+        // 업로드 버튼을 클릭하면 이미지 업로드
         $("#fileButton").click(function () {
           $("#image").click();
         });
@@ -50,50 +50,79 @@
             reader.readAsDataURL(file);
           }
         });
+        // ID 중복 체크 확인
+        $("#userId").blur(function () {
+          var userId = $("#userId").val();
+          /* 콘솔에서 동작되는 지 확인 완료
+          console.log(userId); blur */
+
+          function checkUserId() {
+            $.ajax({
+              type: "GET",
+              url: "/checkId",
+              data: { id_give: userId },
+              success: function (response) {
+                if (response.result == "failure") {
+                  alert("아이디가 중복됩니다.");
+                } else {
+                  return "success";
+                }
+              },
+            });
+          }
+          checkUserId();
+        });
       });
 
-      // 비밀번호 체크 기능
-      function validatePassword() {
-        var pw = document.getElementById("password").value;
-        var pw2 = document.getElementById("password2").value;
-
-        if (pw != pw2) {
-          alert("패스워드가 일치하지 않습니다.");
-        }
+      function changeData(user_id) {
+        $.ajax({
+          type: "POST",
+          url: "/mod/data",
+          data: { user_id: user_id },
+          success: function (response) {
+            if (response["result"] == "success") {
+              alert("수정 완료");
+              window.location.href = "/main"; // 메인 페이지로 이동
+            } else {
+              alert("수정 실패");
+            }
+          },
+        });
       }
     </script>
   </head>
   <body>
-    <form class="wrapper" onsubmit="return false">
+    <form id="signupForm" class="wrapper" onsubmit="return false">
       <div class="title"><h1>회원정보를 입력해 주세요</h1></div>
       <!-- bulma로 묶어주기 -->
       <div class="media">
         <div class="media-left">
           <div id="image_container" class="image is-128x128">
-            <img name="picture_give" src="../static/default_image.jpg" alt="기본 이미지" />
+            <img src="{{ user_data.img }}" alt="기본 이미지" />
           </div>
-          <button class="button is-info" id="fileButton">업로드</button>
-          <input type="file" id="image" name="image" accept="image/*" style="display: none" />
+          <button class="btn btn-primary" id="fileButton">업로드</button>
+          <input type="file" id="image" name="img_give" accept="image/*" style="display: none" />
         </div>
         <div class="media-content">
           <!-- 아이디 -->
           <div class="id">
             <i class="fa-solid fa-address-card fa-2x"></i>
-            <input name="id_give" id="userId" type="text" placeholder="아이디" disabled />
+            <input name="id_give" id="userId" type="text" value="{{ user_data.user_id }}" disabled />
+            <div class="check_font" id="id_check"></div>
           </div>
           <!-- 비밀번호 및 비밀번호 확인 -->
           <div class="password">
             <i class="fa-solid fa-lock fa-2x"></i>
-            <input name="pw_give" id="password" type="password" placeholder="비밀번호" />
+            <input name="pw_give" id="password" type="password" value="{{ user_data.user_pw }}" />
           </div>
           <div class="password">
             <i class="fa-solid fa-lock fa-2x"></i>
-            <input id="password2" type="password" placeholder="비밀번호 확인" />
+            <input id="password2" type="password" value="{{ user_data.user_pw }}" />
           </div>
           <!-- 이름 -->
           <div class="name">
             <i class="fa-solid fa-user fa-2x"></i>
-            <input name="name_give" id="userName" type="text" placeholder="이름" />
+            <input name="name_give" id="userName" type="text" value="{{ user_data.user_name }}" />
           </div>
           <div></div>
         </div>
@@ -168,17 +197,17 @@
         <!-- 학교 -->
         <div>
           <i class="fa-solid fa-address-card fa-2x"></i>
-          <input class="full-width" name="university_give" id="university" type="text" placeholder="학교" />
+          <input class="full-width" name="university_give" id="university" type="text" value="{{ user_data.univ }}" />
         </div>
         <!-- 학과 -->
         <div>
           <i class="fa-solid fa-graduation-cap fa-2x"></i>
-          <input class="full-width" name="major_give" id="major" type="text" placeholder="전공" />
+          <input class="full-width" name="major_give" id="major" type="text" value="{{ user_data.major }}" />
         </div>
       </div>
       <div class="buttons">
-        <button type="submit" class="button is-info">수정</button>
-        <button class="button is-info">취소</button>
+        <button type="submit" class="btn btn-primary" onclick="changeData()">수정</button>
+        <button class="btn btn-primary">취소</button>
       </div>
     </form>
   </body>

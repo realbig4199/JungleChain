@@ -7,6 +7,7 @@ from flask_jwt_extended.config import config
 from jwt.exceptions import ExpiredSignatureError
 from datetime import datetime, timedelta
 import json
+import os
 import time  # https://kimxavi.tistory.com/entry/python-JWT-example
 import jwt
 secret_key = 'junglechain'
@@ -74,8 +75,23 @@ def user_login():
 
 # 회원가입
 
+# ID 중복 체크 확인
 
-@app.route("/signup", methods=["POST"])
+
+@app.route('/checkId')
+def check_id():
+    id_receive = request.args.get('id_give')
+    # 컬렉션 추후 users에서 user로 바꿔야 함.
+    user = db.users.find_one({'user_id': id_receive})
+    if user:
+        response = {'result': 'failure'}
+    else:
+        response = {'result': 'success'}
+
+    return jsonify(response)
+
+
+@app.route("/join", methods=["POST"])
 def join():
     # 사용자 정보 받아오기
     id_recieve = request.form["id_give"]
@@ -88,7 +104,25 @@ def join():
     gender_recieve = request.form["gender_give"]
     university_recieve = request.form["university_give"]
     major_recieve = request.form["major_give"]
-    img_recieve = request.form["img_give"]
+
+    img_recieve = request.files.getlist("files[]")
+
+    if img_recieve:
+        first_file = img_recieve[0]  # 첫 번째 파일만 가져옴.
+        # 파일 이름을 보안에 적합한 이름으로 변환
+        # filename = secure_filename(first_file.filename)
+        filename = secure_filename(first_file.filename)
+        file_path = '../static/img/' + filename  # 저장할 경로와 파일 이름을 조합
+        first_file.save(file_path)  # 파일을 서버에 저장
+        img_recieve = filename
+        # first_file.save('../static/img/', "된다")  # 파일을 서버에 저장
+        img_recieve = filename  # 파일 이름을 img_recieve에 할당
+        print(img_recieve)
+
+    # for file in img_recieve:
+    #     if file:
+    #         filename = file.filename
+    #         print(filename)
 
     result = db.users.find_one({'id': id_recieve})
 
@@ -109,6 +143,20 @@ def join():
         })
         return jsonify({'result': 'success'})
 
+
+# 수정 페이지
+@app.route('/mod', methods=['POST'])
+def mod():
+    user_id = request.form['user_id']
+    data = db.users.find_one({'id': user_id})
+
+    if data:
+        return render_template('modify.html', user_data=data)
+    else:
+        return jsonify({'result': 'failure'})
+
+
+# 수정하기
 
 # 메인 페이지
 app.route('/find')
