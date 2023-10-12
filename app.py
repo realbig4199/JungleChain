@@ -8,7 +8,7 @@ from jwt.exceptions import ExpiredSignatureError
 from datetime import datetime, timedelta
 import json
 import os
-import time  # https://kimxavi.tistory.com/entry/python-JWT-example
+import time
 import jwt
 secret_key = 'junglechain'
 
@@ -58,11 +58,13 @@ def home():
 @app.route('/login', methods=['POST'])
 def user_login():
     # 로그인 정보 유효성 확인 코드
-    id_recieve = request.form['id_give']
-    pw_recieve = request.form['pw_give']
+    jsonData = json.loads(request.data)
+    
+    id_recieve = jsonData.get('id_give')
+    pw_recieve = jsonData.get('pw_give')
 
     # id, 암호화된pw을 가지고 해당 유저를 찾습니다.
-    result = db.users.find_one({'user_id': id_recieve, 'user_pw': pw_recieve})
+    result = db.user.find_one({'user_id': id_recieve, 'user_pw': pw_recieve})
 
     # 로그인 정보 유효할 시 token 생성 후 client로 전달
     if result is not None:
@@ -81,17 +83,21 @@ def user_login():
 # ID 중복 체크 확인
 
 
-@app.route('/checkId')
-def check_id():
-    id_receive = request.args.get('id_give')
-    # 컬렉션 추후 users에서 user로 바꿔야 함.
-    user = db.user.find_one({'user_id': id_receive})
-    if user:
-        response = {'result': 'failure'}
-    else:
-        response = {'result': 'success'}
+# @app.route('/checkId')
+# def check_id():
+#     id_receive = request.args.get('id_give')
+# <<<<<<< HEAD
+    
+# =======
+#     # 컬렉션 추후 users에서 user로 바꿔야 함.
+# >>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
+#     user = db.user.find_one({'user_id': id_receive})
+#     if user:
+#         response = {'result': 'failure'}
+#     else:
+#         response = {'result': 'success'}
 
-    return jsonify(response)
+#     return jsonify(response)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -178,20 +184,21 @@ def mod():
         return jsonify({'result': 'failure'})
 
 
-# 수정하기
+# 수정하기(수정 후 저장)
 
 # 메인 페이지
-app.route('/find')
-
-
+@app.route('/find')
 def find():
     token_receive = request.cookies.get('mytoken')
 
     try:
         # token디코딩합니다.
         payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
-        userinfo = db.users.find_one({'id': payload['id']}, {'_id': 0})
-        return render_template("Main.html", user_info=userinfo)
+        myuser = db.user.find_one({'user_id': payload['user_id']})
+        userinfo = {'user_id':myuser['user_id'], 'user_name':myuser['user_name'], 'user_token':token_receive}
+        breakpoint()
+        print(userinfo)
+        return render_template("main.html", user_info=userinfo)
 
     except jwt.ExpiredSignatureError:
         return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))

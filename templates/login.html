@@ -15,16 +15,18 @@
         }
 
     </style>
-<script src="https://code.jquery.com/jquery-3.4.1.js"></script>  
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>  
 <script>
     function login() {
       $.ajax({
           type: "POST",
           url: "/login",
-          data: {
+          contentType : "application/json",
+          data: JSON.stringify({
               id_give: $('#input_ID').val(),
               pw_give: $('#input_PW').val(),
-          },
+          }),
           success: function (response) {
               console.log(response)
               if (response['result'] == 'success') {
