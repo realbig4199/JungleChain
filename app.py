@@ -37,7 +37,7 @@ app.json = CustomJSONProvider(app)
 UPLOAD_FOLDER = os.getcwd() + '/static/upload'  # 절대 파일 경로(실서버)
 
 # UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로(로컬)
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
 # URL 별로 함수명이 같거나,
@@ -73,7 +73,7 @@ def user_login():
         # JWT 토큰 생성
         payload = {
             'user_id': id_recieve,
-            'exp': datetime.utcnow() + timedelta(seconds=300)  # 24시간 로그인 유지
+            'exp': datetime.utcnow() + timedelta(seconds=600)  # 24시간 로그인 유지
         }
         token = jwt.encode(payload, secret_key, algorithm='HS256')
         return jsonify({'result': 'success', 'token': token})
@@ -179,98 +179,117 @@ def join():
 # 수정 페이지
 @app.route('/mod', methods=['GET'])
 def mod():
-    user_id = request.args.get('id')
-    data = db.user.find_one({'user_id': user_id})
-    if data:
-        # Flask 템플릿에 전달할 데이터 설정
-        user_data = {
-            'user_id': data['user_id'],
-            'user_pw': data['user_pw'],
-            'user_name': data['user_name'],
-            "mbti": data['mbti'],
-            "region": data['region'],
-            "smoking": data['smoking'],
-            "gender": data['gender'],
-            "univ": data['univ'],
-            "major": data['major'],
-            "img": data['img']
-        }
-        mbti_list = list(db.tbl_cd.find(
-            {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
-        region_list = list(db.tbl_cd.find(
-            {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
-        smoking_list = list(db.tbl_cd.find(
-            {'knd': 'smoking'}, {"code": "1", "cd_nm": "1"}))
-        gender_list = list(db.tbl_cd.find(
-            {'knd': 'gender'}, {"code": "1", "cd_nm": "1"}))
+    token_receive = request.cookies.get('mytoken')
 
-        return render_template('modify.html', user_data=user_data, mbti_list=mbti_list, region_list=region_list, smoking_list=smoking_list, gender_list=gender_list)
-    else:
-        return jsonify({'result': 'failure'})
+    try:
+        payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
+        user_id = request.args.get('id')
+        data = db.user.find_one({'user_id': user_id})
+        if data:
+            # Flask 템플릿에 전달할 데이터 설정
+            user_data = {
+                'user_id': data['user_id'],
+                'user_pw': data['user_pw'],
+                'user_name': data['user_name'],
+                "mbti": data['mbti'],
+                "region": data['region'],
+                "smoking": data['smoking'],
+                "gender": data['gender'],
+                "univ": data['univ'],
+                "major": data['major'],
+                "img": data['img']
+            }
+            mbti_list = list(db.tbl_cd.find(
+                {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+            region_list = list(db.tbl_cd.find(
+                {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
+            smoking_list = list(db.tbl_cd.find(
+                {'knd': 'smoking'}, {"code": "1", "cd_nm": "1"}))
+            gender_list = list(db.tbl_cd.find(
+                {'knd': 'gender'}, {"code": "1", "cd_nm": "1"}))
+
+            return render_template('modify.html', user_data=user_data, mbti_list=mbti_list, region_list=region_list, smoking_list=smoking_list, gender_list=gender_list)
+        else:
+            return jsonify({'result': 'failure'})
+
+    except jwt.ExpiredSignatureError:
+        return render_template("login.html", title='정글 고리')
+    except jwt.exceptions.DecodeError:
+        return render_template("login.html", title='정글 고리')
 
 
 # 수정하기(수정 후 저장)
 @app.route('/mod/data', methods=['POST'])
 def mod_data():
-    id_recieve = request.form["id_give"]
-    pw_recieve = request.form["pw_give"]
-    name_recieve = request.form["name_give"]
+    token_receive = request.cookies.get('mytoken')
 
-    mbti_recieve = request.form["mbti_give"]
-    region_recieve = request.form["region_give"]
-    smoking_recieve = request.form["smoking_give"]
-    gender_recieve = request.form["gender_give"]
-    university_recieve = request.form["university_give"]
-    major_recieve = request.form["major_give"]
+    try:
+        payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
+        id_recieve = request.form["id_give"]
+        pw_recieve = request.form["pw_give"]
+        name_recieve = request.form["name_give"]
 
-    img_recieve = None
+        mbti_recieve = request.form["mbti_give"]
+        region_recieve = request.form["region_give"]
+        smoking_recieve = request.form["smoking_give"]
+        gender_recieve = request.form["gender_give"]
+        university_recieve = request.form["university_give"]
+        major_recieve = request.form["major_give"]
 
-    data_user = db.user.find_one({'user_id': id_recieve})
+        img_recieve = None
 
-    if "img_give" in request.files:
-        img_recieve = request.files['img_give']
+        data_user = db.user.find_one({'user_id': id_recieve})
 
-    if img_recieve:
-        if allowed_file(img_recieve.filename):
+        if "img_give" in request.files:
+            img_recieve = request.files['img_give']
+
+        if img_recieve:
+            if allowed_file(img_recieve.filename):
+                result = db.user.update_many({'user_id': id_recieve}, {
+                    '$set': {'user_pw': pw_recieve,
+                            'user_name': name_recieve,
+                            'mbti': mbti_recieve,
+                            'region': region_recieve,
+                            'smoking': smoking_recieve,
+                            'gender': gender_recieve,
+                            'univ': university_recieve,
+                            'major': major_recieve,
+                            }
+                })
+
+                if 'img' in data_user:
+                    oldFile = '../static/upload/' + \
+                        data_user['user_id']+'.'+data_user['img']
+                    if os.path.isfile(oldFile):
+                        os.remove(oldFile)
+
+                file = img_recieve
+                filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
+                filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
+                file.save(filepathtosave)
+                db.user.update_one({'user_id': id_recieve}, {
+                                '$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
+                return jsonify({'result': 'success'})
+            else:
+                return jsonify({'result': 'failure', 'msg': '허용되지 않는 확장자입니다.'})
+        else:
             result = db.user.update_many({'user_id': id_recieve}, {
                 '$set': {'user_pw': pw_recieve,
-                         'user_name': name_recieve,
-                         'mbti': mbti_recieve,
-                         'region': region_recieve,
-                         'smoking': smoking_recieve,
-                         'gender': gender_recieve,
-                         'univ': university_recieve,
-                         'major': major_recieve,
-                         }
-            })
-
-            if 'img' in data_user:
-                oldFile = '../static/upload/' + \
-                    data_user['user_id']+'.'+data_user['img']
-                if os.path.isfile(oldFile):
-                    os.remove(oldFile)
-
-            file = img_recieve
-            filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
-            filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepathtosave)
-            db.user.update_one({'user_id': id_recieve}, {
-                               '$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
+                        'user_name': name_recieve,
+                        'mbti': mbti_recieve,
+                        'region': region_recieve,
+                        'smoking': smoking_recieve,
+                        'gender': gender_recieve,
+                        'univ': university_recieve,
+                        'major': major_recieve,
+                        }})
             return jsonify({'result': 'success'})
-        else:
-            return jsonify({'result': 'failure', 'msg': '허용되지 않는 확장자입니다.'})
-    else:
-        result = db.user.update_many({'user_id': id_recieve}, {
-            '$set': {'user_pw': pw_recieve,
-                     'user_name': name_recieve,
-                     'mbti': mbti_recieve,
-                     'region': region_recieve,
-                     'smoking': smoking_recieve,
-                     'gender': gender_recieve,
-                     'univ': university_recieve,
-                     'major': major_recieve,
-                     }})
-        return jsonify({'result': 'success'})
+        
+    except jwt.ExpiredSignatureError:
+        return jsonify({'result': 'fali', 'msg': "로그인 시간이 만료되었습니다."})
+    except jwt.exceptions.DecodeError:
+        return jsonify({'result': 'fali', 'msg': "로그인 정보가 존재하지 않습니다."})
+    
 
 # 메인 페이지
 
@@ -289,10 +308,8 @@ def find():
 
     except jwt.ExpiredSignatureError:
         return render_template("login.html", title='정글 고리')
-        return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return render_template("login.html", title='정글 고리')
-        return redirect(url_for("/", msg="로그인 정보가 존재하지 않습니다."))
 
 
 '''
@@ -301,8 +318,6 @@ def find():
 *
 '''
 # 회원가입 페이지
-
-
 @app.route('/signup')
 def signup():
 
@@ -340,10 +355,8 @@ def main():
 
     except jwt.ExpiredSignatureError:
         return render_template("login.html", title='정글 고리')
-        return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return render_template("login.html", title='정글 고리')
-        return redirect(url_for("/", msg="로그인 정보가 존재하지 않습니다."))
 
 
 @app.route('/main/search', methods=['POST'])
@@ -565,4 +578,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=8080, debug=True)
+    app.run('0.0.0.0', port=5000, debug=True)

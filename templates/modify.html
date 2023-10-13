@@ -142,7 +142,13 @@
                 window.close(); // 팝업 창 닫기
                 window.opener.location.href = "/main?user_id="+id; // 부모 창 리디렉션
               } else {
-                alert("정보 수정에 실패했습니다.");
+                if(response.result == 'fali'){
+                  alert(response.msg);
+                  window.close();
+                  window.opener.location.href = '/'
+                } else {
+                  alert("정보 수정에 실패했습니다.");
+                }
               }
             },
           });
@@ -241,7 +247,7 @@
       </div>
       <div class="buttons">
         <button type="submit" class="btn btn-primary" onclick="changeData()">수정</button>
-        <button class="btn btn-primary">취소</button>
+        <button class="btn btn-primary" onclick="window.close();">취소</button>
       </div>
     </form>
   </body>
