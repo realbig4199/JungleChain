@@ -100,7 +100,7 @@
             function getGraph(jsonData) {
                 var user_id = $("#user_info").val();
                 jsonData["user_id"] = user_id;
-                
+
                 $.ajax({
                     type: "POST",
                     url: "/main/search",
@@ -111,7 +111,8 @@
                             $(".g-holder").remove();
                             setGraph(response['friendData'], response['resultData']);
                         } else {
-                            
+                            alert(response['msg']);
+                            window.location.href="/"
                         }
                     }
                 });

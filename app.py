@@ -34,7 +34,9 @@ class CustomJSONProvider(JSONProvider):
 
 app.json = CustomJSONProvider(app)
 
-UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로
+UPLOAD_FOLDER = os.getcwd() + '/static/upload'  # 절대 파일 경로(실서버)
+
+#UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로(로컬)
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -71,7 +73,7 @@ def user_login():
         # JWT 토큰 생성
         payload = {
             'user_id': id_recieve,
-            'exp': datetime.utcnow() + timedelta(hours=60)  # 24시간 로그인 유지
+            'exp': datetime.utcnow() + timedelta(seconds=300)  # 24시간 로그인 유지
         }
         token = jwt.encode(payload, secret_key, algorithm='HS256')
         return jsonify({'result': 'success', 'token': token})
@@ -285,8 +287,10 @@ def find():
         return render_template("main.html", user_id=userinfo['user_id'], user_name=userinfo['user_name'], img=myuser['img'])
 
     except jwt.ExpiredSignatureError:
+        return render_template("login.html", title='정글 고리')
         return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
+        return render_template("login.html", title='정글 고리')
         return redirect(url_for("/", msg="로그인 정보가 존재하지 않습니다."))
 
 
@@ -323,146 +327,169 @@ def signup():
 
 @app.route('/main')
 def main():
-    user_id = request.args.get('user_id')
-    data = db.user.find_one({'user_id': user_id})
+    token_receive = request.cookies.get('mytoken')
 
-    return render_template('main.html', user_name=data['user_name'], user_id=user_id, img=data['img'])
+    try:
+        payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
 
+        user_id = request.args.get('user_id')
+        data = db.user.find_one({'user_id': user_id})
+
+        return render_template('main.html', user_name=data['user_name'], user_id=user_id, img=data['img'])
+    
+    except jwt.ExpiredSignatureError:
+        return render_template("login.html", title='정글 고리')
+        return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return render_template("login.html", title='정글 고리')
+        return redirect(url_for("/", msg="로그인 정보가 존재하지 않습니다."))
 
 @app.route('/main/search', methods=['POST'])
 def getNetworkGraph():
-    jsonData = json.loads(request.data)
 
-    user_id = jsonData.get('user_id')
+    token_receive = request.cookies.get('mytoken')
 
-    my_data = db.user.find_one({'user_id': user_id})
+    try:
+        payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
+        jsonData = json.loads(request.data)
 
-    mbti_flag = jsonData.get('mbtiBtn')
-    region_flag = jsonData.get('locBtn')
-    univ_flag = jsonData.get('schoolBtn')
-    major_flag = jsonData.get('majBtn')
-    gender_flag = jsonData.get('genBtn')
-    smoking_flag = jsonData.get('smkBtn')
+        user_id = jsonData.get('user_id')
+
+        my_data = db.user.find_one({'user_id': user_id})
+
+        mbti_flag = jsonData.get('mbtiBtn')
+        region_flag = jsonData.get('locBtn')
+        univ_flag = jsonData.get('schoolBtn')
+        major_flag = jsonData.get('majBtn')
+        gender_flag = jsonData.get('genBtn')
+        smoking_flag = jsonData.get('smkBtn')
+        
+
+        result_data = {}
+        friend_data = {}
+
+        queryString = {
+            'user_id': {'$ne': user_id}
+        }
+        if mbti_flag:
+            queryString['mbti'] = my_data["mbti"]
+            mbti_data = list(db.user.find(queryString))
+
+            for data_set in mbti_data:
+                user_id = data_set["user_id"]
+                if "img" in data_set:
+                    img_id = data_set["img"]
+                else:
+                    img_id = ""
+                if user_id not in result_data:
+                    result_data[user_id] = 1
+                    friend_data[user_id] = img_id
+                else:
+                    result_data[user_id] += 1
+            del queryString['mbti']
+
+        if region_flag:
+            queryString['region'] = my_data["region"]
+            region_data = list(db.user.find(queryString))
+
+            for data_set in region_data:
+                user_id = data_set["user_id"]
+                if "img" in data_set:
+                    img_id = data_set["img"]
+                else:
+                    img_id = ""
+                if user_id not in result_data:
+                    result_data[user_id] = 1
+                    friend_data[user_id] = img_id
+                else:
+                    result_data[user_id] += 1
+
+            del queryString['region']
+        if smoking_flag:
+            queryString['smoking'] = my_data['smoking']
+            smoking_data = list(db.user.find(queryString))
+
+            for data_set in smoking_data:
+                user_id = data_set["user_id"]
+                if "img" in data_set:
+                    img_id = data_set["img"]
+                else:
+                    img_id = ""
+                if user_id not in result_data:
+                    result_data[user_id] = 1
+                    friend_data[user_id] = img_id
+                else:
+                    result_data[user_id] += 1
+
+            del queryString['smoking']
+
+        if univ_flag:
+            queryString['univ'] = my_data['univ']
+            univ_data = list(db.user.find(queryString))
+
+            for data_set in univ_data:
+                user_id = data_set["user_id"]
+                if "img" in data_set:
+                    img_id = data_set["img"]
+                else:
+                    img_id = ""
+                if user_id not in result_data:
+                    result_data[user_id] = 1
+                    friend_data[user_id] = img_id
+                else:
+                    result_data[user_id] += 1
+
+            del queryString['univ']
+
+        if major_flag:
+            queryString['major'] = my_data['major']
+            major_data = list(db.user.find(queryString))
+
+            for data_set in major_data:
+                user_id = data_set["user_id"]
+
+                if "img" in data_set:
+                    img_id = data_set["img"]
+                else:
+                    img_id = ""
+
+                if user_id not in result_data:
+                    result_data[user_id] = 1
+                    friend_data[user_id] = img_id
+                else:
+                    result_data[user_id] += 1
+
+            del queryString['major']
+
+        if gender_flag:
+            queryString['gender'] = my_data['gender']
+            gender_data = list(db.user.find(queryString))
+
+            for data_set in gender_data:
+                user_id = data_set["user_id"]
+                if "img" in data_set:
+                    img_id = data_set["img"]
+                else:
+                    img_id = ""
+                if user_id not in result_data:
+                    result_data[user_id] = 1
+                    friend_data[user_id] = img_id
+                else:
+                    result_data[user_id] += 1
+
+            del queryString['gender']
+
+
+        response = {'result': 'success', "sort": "",
+                    "resultData": result_data, "friendData": friend_data}
+        return jsonify(response)
     
-
-    result_data = {}
-    friend_data = {}
-
-    queryString = {
-        'user_id': {'$ne': user_id}
-    }
-    if mbti_flag:
-        queryString['mbti'] = my_data["mbti"]
-        mbti_data = list(db.user.find(queryString))
-
-        for data_set in mbti_data:
-            user_id = data_set["user_id"]
-            if "img" in data_set:
-                img_id = data_set["img"]
-            else:
-                img_id = ""
-            if user_id not in result_data:
-                result_data[user_id] = 1
-                friend_data[user_id] = img_id
-            else:
-                result_data[user_id] += 1
-        del queryString['mbti']
-
-    if region_flag:
-        queryString['region'] = my_data["region"]
-        region_data = list(db.user.find(queryString))
-
-        for data_set in region_data:
-            user_id = data_set["user_id"]
-            if "img" in data_set:
-                img_id = data_set["img"]
-            else:
-                img_id = ""
-            if user_id not in result_data:
-                result_data[user_id] = 1
-                friend_data[user_id] = img_id
-            else:
-                result_data[user_id] += 1
-
-        del queryString['region']
-    if smoking_flag:
-        queryString['smoking'] = my_data['smoking']
-        smoking_data = list(db.user.find(queryString))
-
-        for data_set in smoking_data:
-            user_id = data_set["user_id"]
-            if "img" in data_set:
-                img_id = data_set["img"]
-            else:
-                img_id = ""
-            if user_id not in result_data:
-                result_data[user_id] = 1
-                friend_data[user_id] = img_id
-            else:
-                result_data[user_id] += 1
-
-        del queryString['smoking']
-
-    if univ_flag:
-        queryString['univ'] = my_data['univ']
-        univ_data = list(db.user.find(queryString))
-
-        for data_set in univ_data:
-            user_id = data_set["user_id"]
-            if "img" in data_set:
-                img_id = data_set["img"]
-            else:
-                img_id = ""
-            if user_id not in result_data:
-                result_data[user_id] = 1
-                friend_data[user_id] = img_id
-            else:
-                result_data[user_id] += 1
-
-        del queryString['univ']
-
-    if major_flag:
-        queryString['major'] = my_data['major']
-        major_data = list(db.user.find(queryString))
-
-        for data_set in major_data:
-            user_id = data_set["user_id"]
-
-            if "img" in data_set:
-                img_id = data_set["img"]
-            else:
-                img_id = ""
-
-            if user_id not in result_data:
-                result_data[user_id] = 1
-                friend_data[user_id] = img_id
-            else:
-                result_data[user_id] += 1
-
-        del queryString['major']
-
-    if gender_flag:
-        queryString['gender'] = my_data['gender']
-        gender_data = list(db.user.find(queryString))
-
-        for data_set in gender_data:
-            user_id = data_set["user_id"]
-            if "img" in data_set:
-                img_id = data_set["img"]
-            else:
-                img_id = ""
-            if user_id not in result_data:
-                result_data[user_id] = 1
-                friend_data[user_id] = img_id
-            else:
-                result_data[user_id] += 1
-
-        del queryString['gender']
-
-
-    response = {'result': 'success', "sort": "",
-                "resultData": result_data, "friendData": friend_data}
-    return jsonify(response)
+    except jwt.ExpiredSignatureError:
+        return jsonify({'result': 'fali', 'msg': "로그인 시간이 만료되었습니다."})
+        
+    except jwt.exceptions.DecodeError:
+        return jsonify({'result': 'fali', 'msg': "로그인 정보가 존재하지 않습니다."})
+        
 
 @app.route('/detail', methods=['GET'])
 def detail():
@@ -532,7 +559,7 @@ def logout():
 
     # [FIXME] 로그아웃 JWT 제거 구현 필요
 
-    return render_template('login.html')
+    return render_template('login.html', title='정글 고리')
 
 
 if __name__ == '__main__':
