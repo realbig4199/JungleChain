@@ -36,7 +36,7 @@ app.json = CustomJSONProvider(app)
 
 UPLOAD_FOLDER = os.getcwd() + '/static/upload'  # 절대 파일 경로(실서버)
 
-#UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로(로컬)
+# UPLOAD_FOLDER = os.getcwd() + '\\static\\upload'  # 절대 파일 경로(로컬)
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -85,21 +85,17 @@ def user_login():
 # ID 중복 체크 확인
 
 
-# @app.route('/checkId')
-# def check_id():
-#     id_receive = request.args.get('id_give')
-# <<<<<<< HEAD
+@app.route('/checkId')
+def check_id():
+    id_receive = request.args.get('id_give')
+    user = db.user.find_one({'user_id': id_receive})
+    if user:
+        response = {'result': 'failure'}
+    else:
+        response = {'result': 'success'}
 
-# =======
-#     # 컬렉션 추후 users에서 user로 바꿔야 함.
-# >>>>>>> d09a594fe63bddc2065721603c28f5b53febc4c6
-#     user = db.user.find_one({'user_id': id_receive})
-#     if user:
-#         response = {'result': 'failure'}
-#     else:
-#         response = {'result': 'success'}
+    return jsonify(response)
 
-#     return jsonify(response)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -158,7 +154,8 @@ def join():
                     img_recieve.filename.rsplit('.', 1)[1]
                 filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(filepathtosave)
-                db.user.update_one({'user_id': id_recieve}, {'$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
+                db.user.update_one({'user_id': id_recieve}, {
+                                   '$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
                 return jsonify({'result': 'success'})
             else:
                 return jsonify({'result': 'fail', 'msg': '허용되지 않는 확장자입니다.'})
@@ -227,28 +224,29 @@ def mod_data():
     major_recieve = request.form["major_give"]
 
     img_recieve = None
-    
+
     data_user = db.user.find_one({'user_id': id_recieve})
 
     if "img_give" in request.files:
         img_recieve = request.files['img_give']
 
-    if img_recieve: 
+    if img_recieve:
         if allowed_file(img_recieve.filename):
             result = db.user.update_many({'user_id': id_recieve}, {
                 '$set': {'user_pw': pw_recieve,
-                    'user_name': name_recieve,
-                    'mbti': mbti_recieve,
-                    'region': region_recieve,
-                    'smoking': smoking_recieve,
-                    'gender': gender_recieve,
-                    'univ': university_recieve,
-                    'major': major_recieve,
-                }
+                         'user_name': name_recieve,
+                         'mbti': mbti_recieve,
+                         'region': region_recieve,
+                         'smoking': smoking_recieve,
+                         'gender': gender_recieve,
+                         'univ': university_recieve,
+                         'major': major_recieve,
+                         }
             })
-            
+
             if 'img' in data_user:
-                oldFile = '../static/upload/'+data_user['user_id']+'.'+data_user['img']
+                oldFile = '../static/upload/' + \
+                    data_user['user_id']+'.'+data_user['img']
                 if os.path.isfile(oldFile):
                     os.remove(oldFile)
 
@@ -256,24 +254,27 @@ def mod_data():
             filename = id_recieve+'.'+img_recieve.filename.rsplit('.', 1)[1]
             filepathtosave = os.path.join(UPLOAD_FOLDER, filename)
             file.save(filepathtosave)
-            db.user.update_one({'user_id': id_recieve}, {'$set': {"img"  : img_recieve.filename.rsplit('.', 1)[1]}})
+            db.user.update_one({'user_id': id_recieve}, {
+                               '$set': {"img": img_recieve.filename.rsplit('.', 1)[1]}})
             return jsonify({'result': 'success'})
-        else :
+        else:
             return jsonify({'result': 'failure', 'msg': '허용되지 않는 확장자입니다.'})
-    else :
+    else:
         result = db.user.update_many({'user_id': id_recieve}, {
             '$set': {'user_pw': pw_recieve,
-                    'user_name': name_recieve,
-                    'mbti': mbti_recieve,
-                    'region': region_recieve,
-                    'smoking': smoking_recieve,
-                    'gender': gender_recieve,
-                    'univ': university_recieve,
-                    'major': major_recieve,
-                    }})
+                     'user_name': name_recieve,
+                     'mbti': mbti_recieve,
+                     'region': region_recieve,
+                     'smoking': smoking_recieve,
+                     'gender': gender_recieve,
+                     'univ': university_recieve,
+                     'major': major_recieve,
+                     }})
         return jsonify({'result': 'success'})
 
 # 메인 페이지
+
+
 @app.route('/find')
 def find():
     token_receive = request.cookies.get('mytoken')
@@ -336,13 +337,14 @@ def main():
         data = db.user.find_one({'user_id': user_id})
 
         return render_template('main.html', user_name=data['user_name'], user_id=user_id, img=data['img'])
-    
+
     except jwt.ExpiredSignatureError:
         return render_template("login.html", title='정글 고리')
         return redirect(url_for("/", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
         return render_template("login.html", title='정글 고리')
         return redirect(url_for("/", msg="로그인 정보가 존재하지 않습니다."))
+
 
 @app.route('/main/search', methods=['POST'])
 def getNetworkGraph():
@@ -363,7 +365,6 @@ def getNetworkGraph():
         major_flag = jsonData.get('majBtn')
         gender_flag = jsonData.get('genBtn')
         smoking_flag = jsonData.get('smkBtn')
-        
 
         result_data = {}
         friend_data = {}
@@ -479,51 +480,50 @@ def getNetworkGraph():
 
             del queryString['gender']
 
-
         response = {'result': 'success', "sort": "",
                     "resultData": result_data, "friendData": friend_data}
         return jsonify(response)
-    
+
     except jwt.ExpiredSignatureError:
         return jsonify({'result': 'fali', 'msg': "로그인 시간이 만료되었습니다."})
-        
+
     except jwt.exceptions.DecodeError:
         return jsonify({'result': 'fali', 'msg': "로그인 정보가 존재하지 않습니다."})
-        
+
 
 @app.route('/detail', methods=['GET'])
 def detail():
     user_id = request.args.get('id')
     data = db.user.find_one({'user_id': user_id})
-    
+
     if data:
         # Flask 템플릿에 전달할 데이터 설정
         mbti_nm = ""
         region_nm = ""
         smoking_nm = ""
         gender_nm = ""
-        
-        mbti_list = list(db.tbl_cd.find({'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+
+        mbti_list = list(db.tbl_cd.find(
+            {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
         region_list = list(db.tbl_cd.find(
             {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
-        
+
         for mbtiSet in mbti_list:
             if data['mbti'] == mbtiSet['code']:
                 mbti_nm = mbtiSet['cd_nm']
 
-
         for dataSet in region_list:
             if data['region'] == dataSet['code']:
                 region_nm = dataSet['cd_nm']
-        
+
         if data['smoking'] == 'Y':
             smoking_nm = '흡연'
-        else :
+        else:
             smoking_nm = '비흡연'
 
         if data['gender'] == 'M':
             gender_nm = '남성'
-        else :
+        else:
             gender_nm = '여성'
 
         user_data = {
@@ -542,6 +542,7 @@ def detail():
 
         return render_template('detail.html', user_data=user_data)
 
+
 @app.route('/detail/like')
 def like():
     user_id = request.args.get('id')
@@ -554,6 +555,7 @@ def like():
 
     return jsonify(response)
 
+
 @app.route('/logout')
 def logout():
 
@@ -564,4 +566,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=8080, debug=True)
-    

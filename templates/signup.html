@@ -64,6 +64,7 @@
               success: function (response) {
                 if (response.result == "failure") {
                   alert("아이디가 중복됩니다.");
+                  $("#userId").val("");
                 } else {
                   return "success";
                 }
@@ -120,7 +121,7 @@
           // 이미지 데이터를 FormData에 추가
           formData.append("img_give", imageFile);
           */
-          
+
           var form = $("#signupForm")[0];
           var formData = new FormData(form);
 
@@ -196,7 +197,7 @@
           <select class="full-width" name="mbti_give" id="mbti">
             <option value="" disabled selected>MBTI</option>
             {% for obj in mbti_list %}
-              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
             {% endfor %}
           </select>
         </div>
@@ -206,7 +207,7 @@
           <select class="full-width" name="region_give" id="region">
             <option value="" disabled selected>거주지</option>
             {% for obj in region_list %}
-              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
             {% endfor %}
           </select>
         </div>
@@ -216,7 +217,7 @@
           <select class="full-width" name="smoking_give" id="smoke">
             <option value="" disabled selected>흡연여부</option>
             {% for obj in smoking_list %}
-              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
             {% endfor %}
           </select>
         </div>
@@ -226,7 +227,7 @@
           <select class="full-width" name="gender_give" id="gender">
             <option value="" disabled selected>성별</option>
             {% for obj in gender_list %}
-              <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
+            <option value="{{obj['code']}}">{{obj['cd_nm']}}</option>
             {% endfor %}
           </select>
         </div>
@@ -243,7 +244,7 @@
       </div>
       <div class="buttons">
         <button class="btn btn-primary" onclick="checkData()">등록</button>
-        <button class="btn btn-primary">취소</button>
+        <button class="btn btn-primary" onclick="window.location.href = '/'">취소</button>
       </div>
     </form>
   </body>
