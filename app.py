@@ -506,55 +506,64 @@ def getNetworkGraph():
 
 @app.route('/detail', methods=['GET'])
 def detail():
-    user_id = request.args.get('id')
-    data = db.user.find_one({'user_id': user_id})
+        
+    token_receive = request.cookies.get('mytoken')
 
-    if data:
-        # Flask 템플릿에 전달할 데이터 설정
-        mbti_nm = ""
-        region_nm = ""
-        smoking_nm = ""
-        gender_nm = ""
+    try:
+        payload = jwt.decode(token_receive, secret_key, algorithms=['HS256'])
+        user_id = request.args.get('id')
+        data = db.user.find_one({'user_id': user_id})
 
-        mbti_list = list(db.tbl_cd.find(
-            {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
-        region_list = list(db.tbl_cd.find(
-            {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
+        if data:
+            # Flask 템플릿에 전달할 데이터 설정
+            mbti_nm = ""
+            region_nm = ""
+            smoking_nm = ""
+            gender_nm = ""
 
-        for mbtiSet in mbti_list:
-            if data['mbti'] == mbtiSet['code']:
-                mbti_nm = mbtiSet['cd_nm']
+            mbti_list = list(db.tbl_cd.find(
+                {'knd': 'mbti'}, {"code": "1", "cd_nm": "1"}))
+            region_list = list(db.tbl_cd.find(
+                {'knd': 'region'}, {"code": "1", "cd_nm": "1"}))
 
-        for dataSet in region_list:
-            if data['region'] == dataSet['code']:
-                region_nm = dataSet['cd_nm']
+            for mbtiSet in mbti_list:
+                if data['mbti'] == mbtiSet['code']:
+                    mbti_nm = mbtiSet['cd_nm']
 
-        if data['smoking'] == 'Y':
-            smoking_nm = '흡연'
-        else:
-            smoking_nm = '비흡연'
+            for dataSet in region_list:
+                if data['region'] == dataSet['code']:
+                    region_nm = dataSet['cd_nm']
 
-        if data['gender'] == 'M':
-            gender_nm = '남성'
-        else:
-            gender_nm = '여성'
+            if data['smoking'] == 'Y':
+                smoking_nm = '흡연'
+            else:
+                smoking_nm = '비흡연'
 
-        user_data = {
-            'user_id': data['user_id'],
-            'user_pw': data['user_pw'],
-            'user_name': data['user_name'],
-            "mbti": mbti_nm,
-            "region": region_nm,
-            "smoking": smoking_nm,
-            "gender": gender_nm,
-            "univ": data['univ'],
-            "major": data['major'],
-            "img": data['img'],
-            "like": data['like']
-        }
+            if data['gender'] == 'M':
+                gender_nm = '남성'
+            else:
+                gender_nm = '여성'
 
-        return render_template('detail.html', user_data=user_data)
+            user_data = {
+                'user_id': data['user_id'],
+                'user_pw': data['user_pw'],
+                'user_name': data['user_name'],
+                "mbti": mbti_nm,
+                "region": region_nm,
+                "smoking": smoking_nm,
+                "gender": gender_nm,
+                "univ": data['univ'],
+                "major": data['major'],
+                "img": data['img'],
+                "like": data['like']
+            }
 
+            return render_template('detail.html', user_data=user_data)
+
+    except jwt.ExpiredSignatureError:
+        return render_template("login.html", title='정글 고리')
+    except jwt.exceptions.DecodeError:
+        return render_template("login.html", title='정글 고리')
 
 @app.route('/detail/like')
 def like():
